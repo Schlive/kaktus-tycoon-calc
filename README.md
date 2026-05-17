@@ -17,7 +17,7 @@ Alle Berechnungen laufen vollständig lokal im Browser.
 
 ---
 
-# 🚀 Starten der Website
+# Starten der Website
 
 ## Variante 1 — Direkt lokal öffnen
 
@@ -50,7 +50,7 @@ http://localhost:8080
 ---
 
 
-# 🖥️ Aufbau der Oberfläche
+# Aufbau der Oberfläche
 
 Die Website ist in 4 Hauptbereiche unterteilt:
 
@@ -84,7 +84,7 @@ Kohlebohrer erzeugen Kohle für Kohlekraftwerke.
 | Kohle produziert | Wie viel Kohle pro Zyklus erzeugt wird |
 | Intervall (Sek)  | Wie oft produziert wird                |
 
-# 🏭 Kohlekraftwerk
+# Kohlekraftwerk
 
 Kohlekraftwerke wandeln Kohle in Energie um.
 
