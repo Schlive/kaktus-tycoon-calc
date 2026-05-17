@@ -112,6 +112,61 @@ header {
   color: var(--text-muted);
 }
 
+/* ── Save / Load controls ── */
+.save-controls {
+  display: flex; align-items: center; gap: 8px;
+}
+.save-controls .divider {
+  width: 1px; height: 28px;
+  background: var(--border2);
+  margin: 0 4px;
+}
+.hbtn {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-family: var(--font-m); font-size: 9px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.hbtn:hover { border-color: var(--text-muted); color: var(--text); background: var(--surface3); }
+.hbtn.primary { border-color: var(--green-dim); color: var(--green); }
+.hbtn.primary:hover { background: var(--green-dim); border-color: var(--green); }
+.hbtn.danger:hover { border-color: var(--red); color: var(--red); }
+.hbtn .bi { font-size: 12px; }
+
+/* Auto-save indicator */
+.autosave-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--text-dim);
+  transition: background 0.4s;
+  flex-shrink: 0;
+}
+.autosave-dot.saved   { background: var(--green); }
+.autosave-dot.saving  { background: var(--coal); }
+
+/* Hidden file input */
+#fileImportInput { display: none; }
+
+/* ── Toast notification ── */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(12px);
+  background: var(--surface3); border: 1px solid var(--border2);
+  color: var(--text); font-family: var(--font-m); font-size: 11px;
+  padding: 9px 18px; border-radius: 6px; letter-spacing: 1px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 9999; white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.ok   { border-color: var(--green); color: var(--green); }
+.toast.err  { border-color: var(--red);   color: var(--red); }
+
 /* ══════════════════════════════════════
    LAYOUT
 ══════════════════════════════════════ */
@@ -500,12 +555,34 @@ footer {
     </div>
   </div>
   <div class="header-right">
+
+    <!-- Save / Load controls -->
+    <div class="save-controls">
+      <div class="autosave-dot" id="autosaveDot" title="Auto-Speichern Status"></div>
+      <button class="hbtn primary" onclick="exportJSON()" title="Als JSON-Datei herunterladen">
+        <span class="bi">💾</span> Exportieren
+      </button>
+      <button class="hbtn" onclick="document.getElementById('fileImportInput').click()" title="JSON-Datei laden">
+        <span class="bi">📂</span> Importieren
+      </button>
+      <div class="divider"></div>
+      <button class="hbtn danger" onclick="confirmReset()" title="Alle Eingaben zurücksetzen">
+        <span class="bi">↺</span> Reset
+      </button>
+    </div>
+
     <div class="live-block">
       <div class="live-rate" id="hdrRate">0.00</div>
       <div class="live-label">Kakteen / Sekunde</div>
     </div>
   </div>
 </header>
+
+<!-- Hidden file input for import -->
+<input type="file" id="fileImportInput" accept=".json,application/json" onchange="importJSON(this)">
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
 
 <!-- ══════════════ ALERTS ══════════════ -->
 <div class="alerts-panel" id="alertsPanel"></div>
@@ -1241,20 +1318,155 @@ function renderAll() {
   document.getElementById('fabrikContainer').innerHTML    = fabrikList.map(renderFabrikCard).join('');
   renderSammler();
   updateDisplay();
+  autoSave();
 }
 
 // ═══════════════════════════════════════════
-//  INIT — load with example values
+//  SAVE / LOAD
 // ═══════════════════════════════════════════
-sammler.rate = 0;
+const STORAGE_KEY = 'kaktus-tycoon-v1';
+let _saveTimer = null;
 
-// Add example components with the game's default values
-bohrerList.push({ id: uid(), coalProd: 190,  interval: 10.8, booster: { mult: 1, hours: 0 } });
-kraftwerkList.push({ id: uid(), eProd: 650,  coalCons: 730,  interval: 7.2,  booster: { mult: 1, hours: 0 } });
-holzofenList.push({ id: uid(), eProd: 260,   woodCons: 146,  interval: 14.4, initialWood: 5000, booster: { mult: 1, hours: 0 } });
-fabrikList.push({ id: uid(), cProd: 5292,    eCons: 140,     interval: 3.6,  booster: { mult: 1, hours: 0 } });
+function getSnapshot() {
+  return {
+    version: 1,
+    _idCounter: _id,
+    sammler:       JSON.parse(JSON.stringify(sammler)),
+    bohrerList:    JSON.parse(JSON.stringify(bohrerList)),
+    kraftwerkList: JSON.parse(JSON.stringify(kraftwerkList)),
+    holzofenList:  JSON.parse(JSON.stringify(holzofenList)),
+    fabrikList:    JSON.parse(JSON.stringify(fabrikList)),
+    timeInput:     document.getElementById('timeInput')?.value ?? '15min, 1h, 4h, 12h, 24h'
+  };
+}
+
+function applySnapshot(s) {
+  if (!s || s.version !== 1) return false;
+  _id = s._idCounter ?? (_id);
+  Object.assign(sammler, s.sammler);
+  bohrerList     = s.bohrerList    ?? [];
+  kraftwerkList  = s.kraftwerkList ?? [];
+  holzofenList   = s.holzofenList  ?? [];
+  fabrikList     = s.fabrikList    ?? [];
+  const ti = document.getElementById('timeInput');
+  if (ti && s.timeInput) ti.value = s.timeInput;
+  return true;
+}
+
+// ── Auto-save to localStorage ──
+function autoSave() {
+  const dot = document.getElementById('autosaveDot');
+  if (dot) dot.className = 'autosave-dot saving';
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(getSnapshot()));
+      if (dot) dot.className = 'autosave-dot saved';
+      setTimeout(() => { if (dot) dot.className = 'autosave-dot'; }, 1800);
+    } catch (e) {
+      if (dot) dot.className = 'autosave-dot';
+    }
+  }, 400);
+}
+
+// Also auto-save when timeInput changes
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('timeInput')?.addEventListener('input', autoSave);
+});
+
+// ── Export JSON file ──
+function exportJSON() {
+  try {
+    const snap = getSnapshot();
+    snap.exportedAt = new Date().toISOString();
+    const blob = new Blob([JSON.stringify(snap, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    const ts   = new Date().toISOString().slice(0,16).replace('T','_').replace(':','-');
+    a.href     = url;
+    a.download = `kaktus-fabrik_${ts}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('✓ Exportiert', 'ok');
+  } catch (e) {
+    showToast('Export fehlgeschlagen', 'err');
+  }
+}
+
+// ── Import JSON file ──
+function importJSON(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const snap = JSON.parse(e.target.result);
+      if (applySnapshot(snap)) {
+        renderAll();
+        showToast('✓ Konfiguration geladen', 'ok');
+      } else {
+        showToast('Ungültige Datei', 'err');
+      }
+    } catch (err) {
+      showToast('Fehler beim Lesen der Datei', 'err');
+    }
+    input.value = ''; // reset so same file can be re-imported
+  };
+  reader.readAsText(file);
+}
+
+// ── Reset ──
+function confirmReset() {
+  if (!confirm('Alle Eingaben zurücksetzen und Beispielwerte laden?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  loadDefaults();
+  renderAll();
+  showToast('Zurückgesetzt', 'ok');
+}
+
+// ── Toast helper ──
+let _toastTimer = null;
+function showToast(msg, type = '') {
+  const el = document.getElementById('toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.className   = 'toast show ' + type;
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { el.className = 'toast'; }, 2400);
+}
+
+// ── Try to restore from localStorage on startup ──
+function tryLoadSaved() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const snap = JSON.parse(raw);
+    return applySnapshot(snap);
+  } catch (e) {
+    return false;
+  }
+}
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+function loadDefaults() {
+  sammler.rate = 0;
+  sammler.booster = { mult: 1, hours: 0 };
+  bohrerList     = [{ id: uid(), coalProd: 190, interval: 10.8, booster: { mult: 1, hours: 0 } }];
+  kraftwerkList  = [{ id: uid(), eProd: 650,   coalCons: 730,  interval: 7.2,  booster: { mult: 1, hours: 0 } }];
+  holzofenList   = [{ id: uid(), eProd: 260,   woodCons: 146,  interval: 14.4, initialWood: 5000, booster: { mult: 1, hours: 0 } }];
+  fabrikList     = [{ id: uid(), cProd: 5292,  eCons: 140,     interval: 3.6,  booster: { mult: 1, hours: 0 } }];
+}
+
+const restoredFromSave = tryLoadSaved();
+if (!restoredFromSave) loadDefaults();
 
 renderAll();
+
+if (restoredFromSave) {
+  setTimeout(() => showToast('✓ Letzter Stand wiederhergestellt', 'ok'), 300);
+}
 </script>
 </body>
 </html>
