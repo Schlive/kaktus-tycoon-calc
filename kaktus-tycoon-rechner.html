@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌵 Kaktus-Tycoon Rechner — Cytooxien</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:          #0a0c12;
+  --surface:     #111420;
+  --surface2:    #181c2a;
+  --surface3:    #1e2234;
+  --border:      #252a3d;
+  --border2:     #2f3652;
+
+  --green:       #3de87a;
+  --green2:      #28bf5e;
+  --green-dim:   #0f3d25;
+  --green-glow:  rgba(61,232,122,0.12);
+
+  --coal:        #f5a623;
+  --coal-dim:    #3d2a09;
+  --coal-glow:   rgba(245,166,35,0.12);
+
+  --energy:      #4fc3f7;
+  --energy-dim:  #0a3344;
+  --energy-glow: rgba(79,195,247,0.12);
+
+  --red:         #f05454;
+  --red-dim:     #3d1212;
+
+  --text:        #d8dce8;
+  --text-muted:  #5a6080;
+  --text-dim:    #3a4060;
+
+  --font-d: 'Bebas Neue', 'Arial Black', sans-serif;
+  --font-m: 'JetBrains Mono', 'Courier New', monospace;
+
+  --radius: 8px;
+  --transition: 0.18s ease;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-m);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Grid texture ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(61,232,122,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(61,232,122,0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ══════════════════════════════════════
+   HEADER
+══════════════════════════════════════ */
+header {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 28px;
+  background: rgba(10,12,18,0.92);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(16px);
+}
+
+.logo {
+  display: flex; align-items: center; gap: 14px;
+}
+.logo-emoji { font-size: 30px; line-height: 1; }
+.logo-text h1 {
+  font-family: var(--font-d);
+  font-size: 26px; letter-spacing: 3px;
+  color: var(--green); line-height: 1;
+}
+.logo-text p {
+  font-size: 9px; letter-spacing: 4px;
+  text-transform: uppercase; color: var(--text-muted);
+  margin-top: 1px;
+}
+
+.header-right {
+  display: flex; align-items: center; gap: 32px;
+}
+
+.live-block {
+  display: flex; flex-direction: column; align-items: flex-end;
+}
+.live-rate {
+  font-family: var(--font-d);
+  font-size: 34px; letter-spacing: 2px; line-height: 1;
+  color: var(--green);
+  transition: color var(--transition);
+}
+.live-rate.warn { color: var(--coal); }
+.live-label {
+  font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ══════════════════════════════════════
+   LAYOUT
+══════════════════════════════════════ */
+main {
+  position: relative; z-index: 1;
+  padding: 24px 20px 0;
+}
+
+/* ── Flow row ── */
+.flow-row {
+  display: flex;
+  gap: 0;
+  align-items: flex-start;
+  width: 100%;
+  min-height: 400px;
+}
+
+/* ── Column ── */
+.flow-col {
+  flex: 1;
+  min-width: 0;
+  padding: 0 6px;
+}
+
+/* ── Arrow connector ── */
+.flow-connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 52px;
+  width: 60px;
+  flex-shrink: 0;
+  gap: 4px;
+}
+
+.connector-label {
+  font-size: 8px; letter-spacing: 2px; text-transform: uppercase;
+  text-align: center;
+}
+.connector-arrow {
+  display: flex; align-items: center; gap: 0;
+  width: 50px;
+}
+.connector-line {
+  flex: 1; height: 2px;
+  position: relative; overflow: visible;
+}
+.connector-line::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-top: 2px dashed currentColor;
+  animation: dash-flow 0.8s linear infinite;
+  background: none;
+}
+@keyframes dash-flow {
+  to { background-position: -20px 0; }
+}
+.connector-head {
+  width: 0; height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 8px solid currentColor;
+  flex-shrink: 0;
+}
+
+.conn-coal   { color: var(--coal); }
+.conn-energy { color: var(--energy); }
+.conn-cactus { color: var(--green); }
+
+/* ── Column header ── */
+.col-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px 10px;
+  margin-bottom: 10px;
+  border-bottom: 2px solid var(--border2);
+}
+.col-header-icon { font-size: 18px; }
+.col-header h2 {
+  font-family: var(--font-d);
+  font-size: 16px; letter-spacing: 3px; text-transform: uppercase;
+}
+.ch-coal   { border-color: var(--coal);   } .ch-coal h2   { color: var(--coal);   }
+.ch-energy { border-color: var(--energy); } .ch-energy h2 { color: var(--energy); }
+.ch-cactus { border-color: var(--green);  } .ch-cactus h2 { color: var(--green);  }
+.ch-output { border-color: var(--border2); } .ch-output h2 { color: var(--text-muted); }
+
+/* ══════════════════════════════════════
+   CARDS
+══════════════════════════════════════ */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.card:hover { border-color: var(--border2); }
+
+.card.c-coal   { border-left: 3px solid var(--coal);   }
+.card.c-energy { border-left: 3px solid var(--energy); }
+.card.c-cactus { border-left: 3px solid var(--green);  }
+.card.c-output { border-left: 3px solid var(--green); background: var(--surface2); }
+
+.card.bottleneck { box-shadow: 0 0 0 1px var(--red) inset; border-color: var(--red); }
+.card.partial    { box-shadow: 0 0 0 1px var(--coal) inset; }
+
+/* Card header */
+.card-top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  cursor: default;
+}
+.card-name {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+}
+.card-icon { font-size: 15px; }
+
+.card-btns {
+  display: flex; gap: 5px;
+}
+.cbtn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  width: 20px; height: 20px;
+  border-radius: 4px;
+  cursor: pointer; font-size: 11px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition);
+  font-family: var(--font-m);
+}
+.cbtn:hover { border-color: var(--border2); color: var(--text); background: var(--surface2); }
+.cbtn.rm:hover { border-color: var(--red); color: var(--red); }
+
+/* Card body */
+.card-body { padding: 11px 12px; }
+
+/* Fields */
+.frow { display: flex; gap: 7px; margin-bottom: 7px; flex-wrap: wrap; }
+.field { flex: 1; min-width: 60px; display: flex; flex-direction: column; gap: 3px; }
+
+.field label {
+  font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted);
+}
+.field input[type=number] {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: var(--font-m);
+  font-size: 11px; font-weight: 600;
+  padding: 5px 7px; width: 100%;
+  transition: border-color var(--transition);
+  -moz-appearance: textfield;
+}
+.field input[type=number]::-webkit-inner-spin-button,
+.field input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+.field input[type=number]:focus { outline: none; border-color: var(--green); }
+
+/* Rate mini display */
+.rate-mini {
+  display: flex; flex-direction: column; gap: 2px;
+  background: var(--bg);
+  border-radius: 4px;
+  padding: 5px 7px;
+  margin-bottom: 7px;
+  font-size: 9px;
+}
+.rate-row { display: flex; justify-content: space-between; align-items: center; }
+.rate-label { color: var(--text-muted); }
+.rate-val { font-weight: 700; }
+.rv-ok   { color: var(--green); }
+.rv-warn { color: var(--coal); }
+.rv-bad  { color: var(--red); }
+
+/* Status badge */
+.status-row {
+  display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 6px;
+}
+.badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 8px; padding: 2px 6px; border-radius: 3px;
+  letter-spacing: 1px; font-weight: 600;
+}
+.b-ok   { background: var(--green-dim);  color: var(--green); }
+.b-warn { background: var(--coal-dim);   color: var(--coal); }
+.b-bad  { background: var(--red-dim);    color: var(--red); }
+.b-info { background: var(--energy-dim); color: var(--energy); }
+
+/* ── Booster section ── */
+.bst-toggle {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 0 0;
+  border-top: 1px solid var(--border);
+  margin-top: 6px;
+  cursor: pointer; user-select: none;
+  font-size: 8px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--text-muted);
+  transition: color var(--transition);
+}
+.bst-toggle:hover { color: var(--text); }
+.bst-toggle.active { color: var(--green); }
+.bst-toggle .bst-badge {
+  margin-left: 4px;
+  background: var(--green-dim); color: var(--green);
+  font-size: 8px; padding: 1px 5px; border-radius: 3px;
+  letter-spacing: 1px;
+}
+.bst-toggle .bst-chevron { margin-left: auto; transition: transform var(--transition); }
+.bst-toggle.open .bst-chevron { transform: rotate(180deg); }
+
+.bst-body { display: none; padding-top: 8px; }
+.bst-body.open { display: block; }
+
+.bst-wood-info {
+  font-size: 8px; color: var(--coal); letter-spacing: 1px;
+  padding: 4px 6px; background: var(--coal-dim); border-radius: 3px;
+  margin-top: 4px;
+}
+
+/* ── Add buttons ── */
+.add-btn {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%;
+  background: none;
+  border: 1px dashed var(--border);
+  color: var(--text-muted);
+  font-family: var(--font-m); font-size: 9px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  padding: 8px; border-radius: var(--radius);
+  cursor: pointer; margin-bottom: 8px;
+  transition: all var(--transition);
+}
+.add-btn:hover { border-color: var(--border2); color: var(--text); background: var(--surface2); }
+
+/* ══════════════════════════════════════
+   OUTPUT CARD
+══════════════════════════════════════ */
+.output-big-val {
+  font-family: var(--font-d);
+  font-size: 46px; letter-spacing: 2px; line-height: 1;
+  color: var(--green); text-align: center; padding: 14px 0 4px;
+}
+.output-unit {
+  text-align: center; font-size: 9px; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px;
+}
+.output-stats {
+  border-top: 1px solid var(--border); padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.ostat-row { display: flex; justify-content: space-between; align-items: center; font-size: 10px; }
+.ostat-label { color: var(--text-muted); }
+.ostat-val { font-weight: 700; }
+
+.efficiency-bar {
+  margin-top: 8px;
+  height: 3px; border-radius: 2px; background: var(--border);
+  overflow: hidden;
+}
+.efficiency-fill {
+  height: 100%; border-radius: 2px;
+  background: var(--green);
+  transition: width 0.4s ease;
+}
+
+/* ══════════════════════════════════════
+   RESULTS SECTION
+══════════════════════════════════════ */
+.results-section {
+  position: relative; z-index: 1;
+  margin: 20px 20px 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.results-header {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.results-header h2 {
+  font-family: var(--font-d);
+  font-size: 18px; letter-spacing: 3px; color: var(--green);
+}
+
+.results-body { padding: 16px 20px; }
+
+.time-input-wrap {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap;
+}
+.time-input-wrap label {
+  font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted);
+  white-space: nowrap;
+}
+.time-input-wrap input {
+  flex: 1; min-width: 220px;
+  background: var(--bg);
+  border: 1px solid var(--border); border-radius: 4px;
+  color: var(--text); font-family: var(--font-m); font-size: 12px;
+  padding: 7px 12px;
+  transition: border-color var(--transition);
+}
+.time-input-wrap input:focus { outline: none; border-color: var(--green); }
+.time-hint {
+  font-size: 8px; color: var(--text-muted); letter-spacing: 1px;
+}
+
+.time-cards { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.tcard {
+  flex: 1; min-width: 120px;
+  background: var(--bg);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px; text-align: center;
+  transition: border-color var(--transition);
+}
+.tcard:hover { border-color: var(--border2); }
+.tcard-period { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
+.tcard-val {
+  font-family: var(--font-d); font-size: 30px; letter-spacing: 1px; line-height: 1;
+  color: var(--green);
+}
+.tcard-sub { font-size: 8px; color: var(--text-muted); margin-top: 3px; letter-spacing: 1px; }
+
+/* ══════════════════════════════════════
+   BOTTLENECK PANEL
+══════════════════════════════════════ */
+.alerts-panel {
+  position: relative; z-index: 1;
+  margin: 14px 20px 0;
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.alert-box {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; border-radius: var(--radius);
+  font-size: 9px; letter-spacing: 1px; font-weight: 600;
+  border: 1px solid;
+}
+.alert-box.warn { background: var(--coal-dim); border-color: var(--coal); color: var(--coal); }
+.alert-box.danger { background: var(--red-dim); border-color: var(--red); color: var(--red); }
+.alert-box.info { background: var(--energy-dim); border-color: var(--energy); color: var(--energy); }
+
+/* ══════════════════════════════════════
+   FOOTER
+══════════════════════════════════════ */
+footer {
+  position: relative; z-index: 1;
+  text-align: center; padding: 24px 20px;
+  font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* ══════════════════════════════════════
+   SCROLLBAR
+══════════════════════════════════════ */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ══════════════════════════════════════
+   ANIMATIONS
+══════════════════════════════════════ */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.card { animation: fade-in 0.25s ease; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ HEADER ══════════════ -->
+<header>
+  <div class="logo">
+    <div class="logo-emoji">🌵</div>
+    <div class="logo-text">
+      <h1>Kaktus-Tycoon Rechner</h1>
+      <p>Cytooxien · Fabrik Optimizer</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="live-block">
+      <div class="live-rate" id="hdrRate">0.00</div>
+      <div class="live-label">Kakteen / Sekunde</div>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════ ALERTS ══════════════ -->
+<div class="alerts-panel" id="alertsPanel"></div>
+
+<!-- ══════════════ MAIN FLOW ══════════════ -->
+<main>
+  <div class="flow-row">
+
+    <!-- ─── COAL COLUMN ─── -->
+    <div class="flow-col">
+      <div class="col-header ch-coal">
+        <span class="col-header-icon">⛏️</span>
+        <h2>Kohle</h2>
+      </div>
+      <div id="bohrerContainer"></div>
+      <button class="add-btn" onclick="addBohrer()">＋ Kohlebohrer</button>
+    </div>
+
+    <!-- Arrow: Coal → Energy -->
+    <div class="flow-connector conn-coal">
+      <div class="connector-label">Kohle</div>
+      <div class="connector-arrow">
+        <div class="connector-line"></div>
+        <div class="connector-head"></div>
+      </div>
+    </div>
+
+    <!-- ─── ENERGY COLUMN ─── -->
+    <div class="flow-col">
+      <div class="col-header ch-energy">
+        <span class="col-header-icon">⚡</span>
+        <h2>Energie</h2>
+      </div>
+      <div id="kraftwerkContainer"></div>
+      <button class="add-btn" onclick="addKraftwerk()">＋ Kohlekraftwerk</button>
+      <div id="holzofenContainer"></div>
+      <button class="add-btn" onclick="addHolzofen()">＋ Holzofen</button>
+    </div>
+
+    <!-- Arrow: Energy → Cactus -->
+    <div class="flow-connector conn-energy">
+      <div class="connector-label">Energie</div>
+      <div class="connector-arrow">
+        <div class="connector-line"></div>
+        <div class="connector-head"></div>
+      </div>
+    </div>
+
+    <!-- ─── CACTUS SOURCES COLUMN ─── -->
+    <div class="flow-col">
+      <div class="col-header ch-cactus">
+        <span class="col-header-icon">🌵</span>
+        <h2>Kaktus</h2>
+      </div>
+      <div id="sammlerContainer"></div>
+      <div id="fabrikContainer"></div>
+      <button class="add-btn" onclick="addFabrik()">＋ Kaktus-Fabrik</button>
+    </div>
+
+    <!-- Arrow: Cactus → Output -->
+    <div class="flow-connector conn-cactus">
+      <div class="connector-label">Output</div>
+      <div class="connector-arrow">
+        <div class="connector-line"></div>
+        <div class="connector-head"></div>
+      </div>
+    </div>
+
+    <!-- ─── OUTPUT COLUMN ─── -->
+    <div class="flow-col" style="max-width:200px; flex-shrink:0;">
+      <div class="col-header ch-output">
+        <span class="col-header-icon">📊</span>
+        <h2>Output</h2>
+      </div>
+      <div class="card c-output">
+        <div class="output-big-val" id="outBig">0.00</div>
+        <div class="output-unit">Kakteen / Sek</div>
+        <div class="output-stats">
+          <div class="ostat-row">
+            <span class="ostat-label">⛏️ Kohle/s</span>
+            <span class="ostat-val rv-warn" id="oCoal">0.00</span>
+          </div>
+          <div class="ostat-row">
+            <span class="ostat-label">⚡ Energie/s</span>
+            <span class="ostat-val rv-ok" id="oEnergy">0.00</span>
+          </div>
+          <div class="ostat-row" style="border-top:1px solid var(--border); margin-top:4px; padding-top:4px;">
+            <span class="ostat-label">🌿 Sammler</span>
+            <span class="ostat-val rv-ok" id="oSammler">0.00</span>
+          </div>
+          <div class="ostat-row">
+            <span class="ostat-label">🏭 Fabriken</span>
+            <span class="ostat-val rv-ok" id="oFabriken">0.00</span>
+          </div>
+          <div class="ostat-row" style="border-top:1px solid var(--border); margin-top:4px; padding-top:4px; font-size:12px;">
+            <span class="ostat-label" style="color:var(--text);">∑ Gesamt/s</span>
+            <span class="ostat-val" id="oTotal" style="color:var(--green); font-size:13px;">0.00</span>
+          </div>
+          <div class="efficiency-bar">
+            <div class="efficiency-fill" id="effBar" style="width:0%"></div>
+          </div>
+          <div style="font-size:8px; color:var(--text-muted); text-align:right; letter-spacing:1px; margin-top:2px;">
+            Fabrik-Effizienz: <span id="effPct" style="color:var(--green)">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end flow-row -->
+</main>
+
+<!-- ══════════════ RESULTS ══════════════ -->
+<div class="results-section">
+  <div class="results-header">
+    <span style="font-size:18px;">⏱</span>
+    <h2>Produktion über Zeitraum</h2>
+  </div>
+  <div class="results-body">
+    <div class="time-input-wrap">
+      <label>Zeiträume:</label>
+      <input type="text" id="timeInput" value="15min, 1h, 4h, 12h, 24h"
+        placeholder="z.B. 15min, 1.5h, 12h, 30s" oninput="refreshResults()">
+      <span class="time-hint">Einheiten: s · min · h (Komma-getrennt)</span>
+    </div>
+    <div class="time-cards" id="timeCards"></div>
+  </div>
+</div>
+
+<footer>Kaktus-Tycoon Fabrik Rechner · Cytooxien Minecraft Server · Alle Berechnungen lokal im Browser</footer>
+
+<!-- ══════════════ SCRIPT ══════════════ -->
+<script>
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let _id = 1;
+const uid = () => _id++;
+
+// Singleton Sammler
+const sammler = {
+  id: 'sammler',
+  rate: 0,
+  booster: { mult: 1, hours: 0 }
+};
+
+let bohrerList     = [];
+let kraftwerkList  = [];
+let holzofenList   = [];
+let fabrikList     = [];
+
+// ═══════════════════════════════════════════
+//  DEFAULTS
+// ═══════════════════════════════════════════
+const mkBohrer    = () => ({ id: uid(), coalProd: 190,  interval: 10.8, booster: { mult: 1, hours: 0 } });
+const mkKraftwerk = () => ({ id: uid(), eProd: 650,     coalCons: 730,  interval: 7.2,  booster: { mult: 1, hours: 0 } });
+const mkHolzofen  = () => ({ id: uid(), eProd: 260,     woodCons: 146,  interval: 14.4, initialWood: 1000, booster: { mult: 1, hours: 0 } });
+const mkFabrik    = () => ({ id: uid(), cProd: 5292,    eCons: 140,     interval: 3.6,  booster: { mult: 1, hours: 0 } });
+
+// ═══════════════════════════════════════════
+//  ADD / REMOVE
+// ═══════════════════════════════════════════
+function addBohrer()    { bohrerList.push(mkBohrer());       renderAll(); }
+function addKraftwerk() { kraftwerkList.push(mkKraftwerk());  renderAll(); }
+function addHolzofen()  { holzofenList.push(mkHolzofen());   renderAll(); }
+function addFabrik()    { fabrikList.push(mkFabrik());       renderAll(); }
+
+function removeCard(type, id) {
+  const map = { bohrer: bohrerList, kraftwerk: kraftwerkList, holzofen: holzofenList, fabrik: fabrikList };
+  const arr = map[type];
+  if (!arr) return;
+  const i = arr.findIndex(x => x.id === id);
+  if (i !== -1) arr.splice(i, 1);
+  renderAll();
+}
+
+// ═══════════════════════════════════════════
+//  CALCULATION ENGINE
+// ═══════════════════════════════════════════
+function boost(b, tSec) {
+  const dur = b.hours * 3600;
+  return (dur > 0 && tSec < dur) ? b.mult : 1;
+}
+
+function calcAtTime(tSec) {
+  // ── 1. Coal production ──────────────────
+  let coalRate = 0;
+  for (const b of bohrerList) {
+    if (b.interval <= 0) continue;
+    coalRate += (b.coalProd / b.interval) * boost(b.booster, tSec);
+  }
+
+  // ── 2. Energy production ─────────────────
+  let availCoal = coalRate;
+  let energyRate = 0;
+  const kwDetails = [];
+
+  for (const kw of kraftwerkList) {
+    if (kw.interval <= 0) continue;
+    const coalNeeded  = kw.coalCons / kw.interval;
+    const ePossible   = kw.eProd   / kw.interval;
+    const bst         = boost(kw.booster, tSec);
+    let factor = 1;
+    if (coalNeeded > 0) {
+      factor = Math.min(1, availCoal / coalNeeded);
+      availCoal = Math.max(0, availCoal - coalNeeded * factor);
+    }
+    const eActual = ePossible * factor * bst;
+    energyRate += eActual;
+    kwDetails.push({ id: kw.id, factor });
+  }
+
+  const ofenDetails = [];
+  for (const o of holzofenList) {
+    if (o.interval <= 0 || o.woodCons <= 0 || o.initialWood <= 0) continue;
+    const burnRate  = o.woodCons / o.interval;
+    const woodDur   = o.initialWood / burnRate;
+    const active    = tSec < woodDur;
+    const eActual   = active ? (o.eProd / o.interval) * boost(o.booster, tSec) : 0;
+    energyRate += eActual;
+    ofenDetails.push({ id: o.id, active, remaining: Math.max(0, woodDur - tSec) });
+  }
+
+  // ── 3. Cactus production ─────────────────
+  const sammlerRate = sammler.rate * boost(sammler.booster, tSec);
+  let availEnergy   = energyRate;
+  let fabrikRate    = 0;
+  const fabDetails  = [];
+
+  for (const f of fabrikList) {
+    if (f.interval <= 0) continue;
+    const eNeeded   = f.eCons / f.interval;
+    const cPossible = f.cProd / f.interval;
+    const bst       = boost(f.booster, tSec);
+    let factor = 1;
+    if (eNeeded > 0) {
+      factor = Math.min(1, availEnergy / eNeeded);
+      availEnergy = Math.max(0, availEnergy - eNeeded * factor);
+    }
+    const cActual = cPossible * factor * bst;
+    fabrikRate += cActual;
+    fabDetails.push({ id: f.id, factor });
+  }
+
+  return {
+    cactusRate:  sammlerRate + fabrikRate,
+    sammlerRate, fabrikRate,
+    coalRate,    energyRate,
+    kwDetails, ofenDetails, fabDetails
+  };
+}
+
+function getBreakpoints(T) {
+  const bps = new Set([0, T]);
+  const all = [sammler, ...bohrerList, ...kraftwerkList, ...holzofenList, ...fabrikList];
+  for (const el of all) {
+    const bp = el.booster.hours * 3600;
+    if (bp > 0 && bp < T) bps.add(bp);
+  }
+  for (const o of holzofenList) {
+    if (o.woodCons > 0 && o.interval > 0 && o.initialWood > 0) {
+      const wd = o.initialWood / (o.woodCons / o.interval);
+      if (wd > 0 && wd < T) bps.add(wd);
+    }
+  }
+  return [...bps].sort((a, b) => a - b);
+}
+
+function calcTotal(T_sec) {
+  const bps = getBreakpoints(T_sec);
+  let total = 0;
+  for (let i = 0; i < bps.length - 1; i++) {
+    const mid = (bps[i] + bps[i+1]) / 2;
+    total += calcAtTime(mid).cactusRate * (bps[i+1] - bps[i]);
+  }
+  return total;
+}
+
+function parseTime(str) {
+  str = str.trim().toLowerCase();
+  const m = str.match(/^([\d.,]+)\s*(h|std|min|s)$/);
+  if (!m) return null;
+  const v = parseFloat(m[1].replace(',', '.'));
+  if (m[2] === 'h' || m[2] === 'std') return v * 3600;
+  if (m[2] === 'min') return v * 60;
+  return v;
+}
+
+function fmtBig(n) {
+  if (!isFinite(n)) return '∞';
+  if (n >= 1e12) return (n/1e12).toFixed(2) + ' B';
+  if (n >= 1e9)  return (n/1e9).toFixed(2)  + ' Mrd';
+  if (n >= 1e6)  return (n/1e6).toFixed(2)  + ' Mio';
+  if (n >= 1e3)  return (n/1e3).toFixed(1)  + ' K';
+  return n.toFixed(0);
+}
+
+function fmtDur(sec) {
+  if (!isFinite(sec) || sec <= 0) return '—';
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  const s = Math.floor(sec % 60);
+  if (h > 0) return `${h}h ${m}min`;
+  if (m > 0) return `${m}min ${s}s`;
+  return `${s}s`;
+}
+
+// ═══════════════════════════════════════════
+//  DISPLAY UPDATE (no full re-render)
+// ═══════════════════════════════════════════
+function updateDisplay() {
+  const r = calcAtTime(0);
+
+  // Header
+  const hdr = document.getElementById('hdrRate');
+  hdr.textContent = r.cactusRate.toFixed(2);
+  hdr.className   = 'live-rate' + (r.cactusRate > 0 ? '' : ' warn');
+
+  // Output card
+  document.getElementById('outBig').textContent     = r.cactusRate.toFixed(2);
+  document.getElementById('oCoal').textContent      = r.coalRate.toFixed(2);
+  document.getElementById('oEnergy').textContent    = r.energyRate.toFixed(2);
+  document.getElementById('oSammler').textContent   = r.sammlerRate.toFixed(2);
+  document.getElementById('oFabriken').textContent  = r.fabrikRate.toFixed(2);
+  document.getElementById('oTotal').textContent     = r.cactusRate.toFixed(2);
+
+  // Efficiency bar (fab rate vs theoretical max)
+  const fabMax = fabrikList.reduce((s, f) => s + (f.cProd / (f.interval||1)), 0);
+  const eff = fabMax > 0 ? Math.min(100, (r.fabrikRate / fabMax) * 100) : 0;
+  document.getElementById('effBar').style.width = eff.toFixed(1) + '%';
+  document.getElementById('effBar').style.background =
+    eff > 80 ? 'var(--green)' : eff > 40 ? 'var(--coal)' : 'var(--red)';
+  document.getElementById('effPct').textContent =
+    fabMax > 0 ? eff.toFixed(0) + '%' : '—';
+  document.getElementById('effPct').style.color =
+    eff > 80 ? 'var(--green)' : eff > 40 ? 'var(--coal)' : 'var(--red)';
+
+  // Alerts
+  const alerts = [];
+  for (const f of r.fabDetails) {
+    if (f.factor < 0.99 && f.factor > 0) {
+      alerts.push({ type: 'warn', msg: `Kaktus-Fabrik läuft auf ${(f.factor*100).toFixed(0)}% Auslastung (Energiemangel)` });
+    } else if (f.factor === 0) {
+      alerts.push({ type: 'danger', msg: 'Kaktus-Fabrik produziert NICHTS — kein Strom verfügbar' });
+    }
+  }
+  for (const kw of r.kwDetails) {
+    if (kw.factor < 0.99 && kw.factor > 0) {
+      alerts.push({ type: 'warn', msg: `Kohlekraftwerk läuft auf ${(kw.factor*100).toFixed(0)}% — Kohlemangel` });
+    } else if (kw.factor === 0) {
+      alerts.push({ type: 'danger', msg: 'Kohlekraftwerk produziert keinen Strom — kein Kohle-Nachschub' });
+    }
+  }
+  for (const o of r.ofenDetails) {
+    if (!o.active) {
+      alerts.push({ type: 'info', msg: 'Holzofen: Holz aufgebraucht — keine Energieproduktion mehr' });
+    } else if (o.remaining < 3600) {
+      alerts.push({ type: 'warn', msg: `Holzofen: Holz reicht noch ca. ${fmtDur(o.remaining)}` });
+    }
+  }
+
+  const panel = document.getElementById('alertsPanel');
+  panel.innerHTML = alerts.map(a => `
+    <div class="alert-box ${a.type}">⚠ ${a.msg}</div>
+  `).join('');
+
+  // Rate minis (update without full re-render)
+  updateRateMinis(r);
+  refreshResults();
+}
+
+function updateRateMinis(r) {
+  // Update per-card rate displays
+  for (const b of bohrerList) {
+    const el = document.querySelector(`[data-rate-id="bohrer-${b.id}"]`);
+    if (el) el.textContent = (b.interval > 0 ? b.coalProd / b.interval : 0).toFixed(2);
+  }
+  for (const kw of kraftwerkList) {
+    const el  = document.querySelector(`[data-rate-id="kw-e-${kw.id}"]`);
+    const el2 = document.querySelector(`[data-rate-id="kw-c-${kw.id}"]`);
+    const fd  = r.kwDetails.find(x => x.id === kw.id);
+    if (el)  el.textContent  = (kw.interval > 0 ? (kw.eProd / kw.interval) * (fd?.factor ?? 1) : 0).toFixed(2);
+    if (el2) el2.textContent = (kw.interval > 0 ? kw.coalCons / kw.interval : 0).toFixed(2);
+    const card = document.querySelector(`.card[data-id="${kw.id}"]`);
+    if (card) {
+      card.classList.toggle('partial',    fd?.factor < 0.99 && fd?.factor > 0);
+      card.classList.toggle('bottleneck', fd?.factor === 0);
+    }
+  }
+  for (const o of holzofenList) {
+    const el  = document.querySelector(`[data-rate-id="ofen-e-${o.id}"]`);
+    const el2 = document.querySelector(`[data-rate-id="ofen-w-${o.id}"]`);
+    const od  = r.ofenDetails.find(x => x.id === o.id);
+    if (el)  el.textContent  = (o.interval > 0 ? o.eProd / o.interval : 0).toFixed(2);
+    if (el2) el2.textContent = od ? fmtDur(od.remaining) : '—';
+    if (el2) el2.className   = 'rate-val ' + (od?.active === false ? 'rv-bad' : od?.remaining < 3600 ? 'rv-warn' : 'rv-warn');
+  }
+  for (const f of fabrikList) {
+    const el  = document.querySelector(`[data-rate-id="fab-c-${f.id}"]`);
+    const el2 = document.querySelector(`[data-rate-id="fab-e-${f.id}"]`);
+    const fd  = r.fabDetails.find(x => x.id === f.id);
+    if (el)  el.textContent  = (f.interval > 0 ? (f.cProd / f.interval) * (fd?.factor ?? 1) : 0).toFixed(2);
+    if (el2) el2.textContent = (f.interval > 0 ? f.eCons / f.interval : 0).toFixed(2);
+    const card = document.querySelector(`.card[data-id="${f.id}"]`);
+    if (card) {
+      card.classList.toggle('partial',    fd?.factor < 0.99 && fd?.factor > 0);
+      card.classList.toggle('bottleneck', fd?.factor === 0);
+    }
+  }
+}
+
+function refreshResults() {
+  const raw    = document.getElementById('timeInput').value;
+  const parts  = raw.split(',').map(s => s.trim()).filter(Boolean);
+  const grid   = document.getElementById('timeCards');
+  grid.innerHTML = '';
+  for (const p of parts) {
+    const sec = parseTime(p);
+    if (sec === null) continue;
+    const total = calcTotal(sec);
+    const card = document.createElement('div');
+    card.className = 'tcard';
+    card.innerHTML = `
+      <div class="tcard-period">${p}</div>
+      <div class="tcard-val">${fmtBig(total)}</div>
+      <div class="tcard-sub">Kakteen</div>
+    `;
+    grid.appendChild(card);
+  }
+}
+
+// ═══════════════════════════════════════════
+//  BOOSTER TOGGLE (DOM-level, no re-render)
+// ═══════════════════════════════════════════
+document.addEventListener('click', e => {
+  const t = e.target.closest('.bst-toggle');
+  if (!t) return;
+  const body = t.nextElementSibling;
+  if (!body || !body.classList.contains('bst-body')) return;
+  const open = body.classList.toggle('open');
+  t.classList.toggle('open', open);
+});
+
+// ═══════════════════════════════════════════
+//  INPUT HANDLING (event delegation)
+// ═══════════════════════════════════════════
+function findObj(type, id) {
+  const idN = typeof id === 'string' ? (id === 'sammler' ? 'sammler' : parseInt(id)) : id;
+  if (type === 'sammler') return sammler;
+  const map = { bohrer: bohrerList, kraftwerk: kraftwerkList, holzofen: holzofenList, fabrik: fabrikList };
+  return map[type]?.find(x => x.id === idN);
+}
+
+function setPath(obj, path, val) {
+  const parts = path.split('.');
+  let cur = obj;
+  for (let i = 0; i < parts.length - 1; i++) cur = cur[parts[i]];
+  cur[parts[parts.length - 1]] = val;
+}
+
+document.addEventListener('change', e => {
+  const inp = e.target;
+  if (!inp.dataset.bind) return;
+  const { type, id, field } = inp.dataset;
+  const obj = findObj(type, id);
+  if (!obj) return;
+  const val = parseFloat(inp.value) || 0;
+  setPath(obj, field, val);
+  updateDisplay();
+  // Update booster badge text without re-render
+  if (field.startsWith('booster')) {
+    const toggle = inp.closest('.bst-body')?.previousElementSibling;
+    if (toggle) {
+      const badge = toggle.querySelector('.bst-badge');
+      const o = findObj(type, id);
+      if (o && o.booster.mult > 1 && o.booster.hours > 0) {
+        if (badge) { badge.textContent = `× ${o.booster.mult}  ${o.booster.hours}h`; }
+        else {
+          const b2 = document.createElement('span');
+          b2.className = 'bst-badge';
+          b2.textContent = `× ${o.booster.mult}  ${o.booster.hours}h`;
+          toggle.insertBefore(b2, toggle.querySelector('.bst-chevron'));
+        }
+        toggle.classList.add('active');
+      } else {
+        if (badge) badge.remove();
+        toggle.classList.remove('active');
+      }
+    }
+  }
+});
+
+// ═══════════════════════════════════════════
+//  RENDERERS
+// ═══════════════════════════════════════════
+function boosterHTML(el, type) {
+  const id   = el.id;
+  const has  = el.booster.mult > 1 && el.booster.hours > 0;
+  return `
+    <div class="bst-toggle ${has ? 'active open' : ''}">
+      🚀 Booster
+      ${has ? `<span class="bst-badge">× ${el.booster.mult}  ${el.booster.hours}h</span>` : ''}
+      <span class="bst-chevron">▾</span>
+    </div>
+    <div class="bst-body ${has ? 'open' : ''}">
+      <div class="frow">
+        <div class="field">
+          <label>Multiplikator (×)</label>
+          <input type="number" min="1" step="0.1" value="${el.booster.mult}"
+            data-bind="1" data-type="${type}" data-id="${id}" data-field="booster.mult">
+        </div>
+        <div class="field">
+          <label>Laufzeit (Stunden)</label>
+          <input type="number" min="0" step="0.25" value="${el.booster.hours}"
+            data-bind="1" data-type="${type}" data-id="${id}" data-field="booster.hours">
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderSammler() {
+  const el = sammler;
+  document.getElementById('sammlerContainer').innerHTML = `
+    <div class="card c-cactus" data-type="sammler" data-id="sammler">
+      <div class="card-top">
+        <div class="card-name"><span class="card-icon">🌿</span> Kaktus-Sammler</div>
+      </div>
+      <div class="card-body">
+        <div class="frow">
+          <div class="field">
+            <label>Kakteen / Sekunde</label>
+            <input type="number" min="0" step="0.1" value="${el.rate}"
+              data-bind="1" data-type="sammler" data-id="sammler" data-field="rate">
+          </div>
+        </div>
+        <div class="rate-mini">
+          <div class="rate-row">
+            <span class="rate-label">Kaktus/s</span>
+            <span class="rate-val rv-ok" data-rate-id="sammler-rate">${el.rate.toFixed(2)}</span>
+          </div>
+        </div>
+        ${boosterHTML(el, 'sammler')}
+      </div>
+    </div>
+  `;
+}
+
+function renderBohrerCard(b) {
+  const rate = b.interval > 0 ? b.coalProd / b.interval : 0;
+  return `
+    <div class="card c-coal" data-type="bohrer" data-id="${b.id}">
+      <div class="card-top">
+        <div class="card-name"><span class="card-icon">⛏️</span> Kohlebohrer</div>
+        <div class="card-btns">
+          <button class="cbtn rm" onclick="removeCard('bohrer',${b.id})" title="Entfernen">✕</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="frow">
+          <div class="field">
+            <label>Kohle produziert</label>
+            <input type="number" min="0" value="${b.coalProd}"
+              data-bind="1" data-type="bohrer" data-id="${b.id}" data-field="coalProd">
+          </div>
+          <div class="field">
+            <label>Intervall (Sek)</label>
+            <input type="number" min="0.1" step="0.1" value="${b.interval}"
+              data-bind="1" data-type="bohrer" data-id="${b.id}" data-field="interval">
+          </div>
+        </div>
+        <div class="rate-mini">
+          <div class="rate-row">
+            <span class="rate-label">Kohle/s</span>
+            <span class="rate-val rv-warn" data-rate-id="bohrer-${b.id}">${rate.toFixed(2)}</span>
+          </div>
+        </div>
+        ${boosterHTML(b, 'bohrer')}
+      </div>
+    </div>
+  `;
+}
+
+function renderKraftwerkCard(kw) {
+  const erate = kw.interval > 0 ? kw.eProd / kw.interval : 0;
+  const crate = kw.interval > 0 ? kw.coalCons / kw.interval : 0;
+  return `
+    <div class="card c-energy" data-type="kraftwerk" data-id="${kw.id}">
+      <div class="card-top">
+        <div class="card-name"><span class="card-icon">🏭</span> Kohlekraftwerk</div>
+        <div class="card-btns">
+          <button class="cbtn rm" onclick="removeCard('kraftwerk',${kw.id})" title="Entfernen">✕</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="frow">
+          <div class="field">
+            <label>Energie prod.</label>
+            <input type="number" min="0" value="${kw.eProd}"
+              data-bind="1" data-type="kraftwerk" data-id="${kw.id}" data-field="eProd">
+          </div>
+          <div class="field">
+            <label>Kohle verb.</label>
+            <input type="number" min="0" value="${kw.coalCons}"
+              data-bind="1" data-type="kraftwerk" data-id="${kw.id}" data-field="coalCons">
+          </div>
+          <div class="field">
+            <label>Intervall (Sek)</label>
+            <input type="number" min="0.1" step="0.1" value="${kw.interval}"
+              data-bind="1" data-type="kraftwerk" data-id="${kw.id}" data-field="interval">
+          </div>
+        </div>
+        <div class="rate-mini">
+          <div class="rate-row">
+            <span class="rate-label">Energie/s (aktuell)</span>
+            <span class="rate-val rv-ok" data-rate-id="kw-e-${kw.id}">${erate.toFixed(2)}</span>
+          </div>
+          <div class="rate-row">
+            <span class="rate-label">Kohle benötigt/s</span>
+            <span class="rate-val rv-warn" data-rate-id="kw-c-${kw.id}">${crate.toFixed(2)}</span>
+          </div>
+        </div>
+        ${boosterHTML(kw, 'kraftwerk')}
+      </div>
+    </div>
+  `;
+}
+
+function renderHolzofenCard(o) {
+  const erate   = o.interval > 0 ? o.eProd / o.interval : 0;
+  const burnR   = o.interval > 0 && o.woodCons > 0 ? o.woodCons / o.interval : 0;
+  const woodDur = burnR > 0 && o.initialWood > 0 ? o.initialWood / burnR : 0;
+  return `
+    <div class="card c-energy" data-type="holzofen" data-id="${o.id}">
+      <div class="card-top">
+        <div class="card-name"><span class="card-icon">🔥</span> Holzofen</div>
+        <div class="card-btns">
+          <button class="cbtn rm" onclick="removeCard('holzofen',${o.id})" title="Entfernen">✕</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="frow">
+          <div class="field">
+            <label>Energie prod.</label>
+            <input type="number" min="0" value="${o.eProd}"
+              data-bind="1" data-type="holzofen" data-id="${o.id}" data-field="eProd">
+          </div>
+          <div class="field">
+            <label>Holz verb.</label>
+            <input type="number" min="0" value="${o.woodCons}"
+              data-bind="1" data-type="holzofen" data-id="${o.id}" data-field="woodCons">
+          </div>
+          <div class="field">
+            <label>Intervall (Sek)</label>
+            <input type="number" min="0.1" step="0.1" value="${o.interval}"
+              data-bind="1" data-type="holzofen" data-id="${o.id}" data-field="interval">
+          </div>
+        </div>
+        <div class="frow">
+          <div class="field">
+            <label>🪵 Holz im Lager</label>
+            <input type="number" min="0" value="${o.initialWood}"
+              data-bind="1" data-type="holzofen" data-id="${o.id}" data-field="initialWood">
+          </div>
+        </div>
+        <div class="rate-mini">
+          <div class="rate-row">
+            <span class="rate-label">Energie/s</span>
+            <span class="rate-val rv-ok" data-rate-id="ofen-e-${o.id}">${erate.toFixed(2)}</span>
+          </div>
+          <div class="rate-row">
+            <span class="rate-label">Holz reicht für</span>
+            <span class="rate-val rv-warn" data-rate-id="ofen-w-${o.id}">${fmtDur(woodDur)}</span>
+          </div>
+        </div>
+        ${boosterHTML(o, 'holzofen')}
+      </div>
+    </div>
+  `;
+}
+
+function renderFabrikCard(f) {
+  const crate = f.interval > 0 ? f.cProd / f.interval : 0;
+  const erate = f.interval > 0 ? f.eCons / f.interval : 0;
+  return `
+    <div class="card c-cactus" data-type="fabrik" data-id="${f.id}">
+      <div class="card-top">
+        <div class="card-name"><span class="card-icon">🌵</span> Kaktus-Fabrik</div>
+        <div class="card-btns">
+          <button class="cbtn rm" onclick="removeCard('fabrik',${f.id})" title="Entfernen">✕</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="frow">
+          <div class="field">
+            <label>Kaktus prod.</label>
+            <input type="number" min="0" value="${f.cProd}"
+              data-bind="1" data-type="fabrik" data-id="${f.id}" data-field="cProd">
+          </div>
+          <div class="field">
+            <label>Energie verb.</label>
+            <input type="number" min="0" value="${f.eCons}"
+              data-bind="1" data-type="fabrik" data-id="${f.id}" data-field="eCons">
+          </div>
+          <div class="field">
+            <label>Intervall (Sek)</label>
+            <input type="number" min="0.1" step="0.1" value="${f.interval}"
+              data-bind="1" data-type="fabrik" data-id="${f.id}" data-field="interval">
+          </div>
+        </div>
+        <div class="rate-mini">
+          <div class="rate-row">
+            <span class="rate-label">Kaktus/s (aktuell)</span>
+            <span class="rate-val rv-ok" data-rate-id="fab-c-${f.id}">${crate.toFixed(2)}</span>
+          </div>
+          <div class="rate-row">
+            <span class="rate-label">Energie benötigt/s</span>
+            <span class="rate-val rv-warn" data-rate-id="fab-e-${f.id}">${erate.toFixed(2)}</span>
+          </div>
+        </div>
+        ${boosterHTML(f, 'fabrik')}
+      </div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════
+//  FULL RENDER
+// ═══════════════════════════════════════════
+function renderAll() {
+  document.getElementById('bohrerContainer').innerHTML    = bohrerList.map(renderBohrerCard).join('');
+  document.getElementById('kraftwerkContainer').innerHTML = kraftwerkList.map(renderKraftwerkCard).join('');
+  document.getElementById('holzofenContainer').innerHTML  = holzofenList.map(renderHolzofenCard).join('');
+  document.getElementById('fabrikContainer').innerHTML    = fabrikList.map(renderFabrikCard).join('');
+  renderSammler();
+  updateDisplay();
+}
+
+// ═══════════════════════════════════════════
+//  INIT — load with example values
+// ═══════════════════════════════════════════
+sammler.rate = 0;
+
+// Add example components with the game's default values
+bohrerList.push({ id: uid(), coalProd: 190,  interval: 10.8, booster: { mult: 1, hours: 0 } });
+kraftwerkList.push({ id: uid(), eProd: 650,  coalCons: 730,  interval: 7.2,  booster: { mult: 1, hours: 0 } });
+holzofenList.push({ id: uid(), eProd: 260,   woodCons: 146,  interval: 14.4, initialWood: 5000, booster: { mult: 1, hours: 0 } });
+fabrikList.push({ id: uid(), cProd: 5292,    eCons: 140,     interval: 3.6,  booster: { mult: 1, hours: 0 } });
+
+renderAll();
+</script>
+</body>
+</html>
