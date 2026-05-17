@@ -24,7 +24,7 @@ Alle Berechnungen laufen vollständig lokal im Browser.
 Einfach die Datei öffnen:
 
 ```
-kaktus-tycoon-rechner.html
+index.html
 ```
 
 Die Website funktioniert komplett ohne Installation.
