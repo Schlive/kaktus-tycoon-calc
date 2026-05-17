@@ -212,7 +212,7 @@ Dadurch entstehen realistische Ergebnisse statt einfacher Durchschnittswerte.
 
 ---
 
-# 🛠️ Technisches
+# Technisches
 * Reines HTML/CSS/JavaScript
 * Keine Frameworks
 * Keine Datenübertragung
