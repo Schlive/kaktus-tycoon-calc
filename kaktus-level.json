@@ -1,0 +1,133 @@
+{
+  "version": 4,
+  "updated": "2025-05-21",
+  "note": "Kaktus-Tycoon Fabrik Rechner — Cytooxien · Level-Daten v4 (mit Atomkraftwerk & Uranbohrer)",
+  "machines": {
+    "bohrer": {
+      "label": "Kohlebohrer",
+      "fields": { "coalProd": "Kohle", "interval": "Intervall (s)" },
+      "levels": [
+        {"level":1,"coalProd":26,"interval":10.8},{"level":2,"coalProd":32,"interval":10.8},
+        {"level":3,"coalProd":40,"interval":10.8},{"level":4,"coalProd":50,"interval":10.8},
+        {"level":5,"coalProd":63,"interval":10.8},{"level":6,"coalProd":79,"interval":10.8},
+        {"level":7,"coalProd":99,"interval":10.8},{"level":8,"coalProd":124,"interval":10.8},
+        {"level":9,"coalProd":155,"interval":10.8},{"level":10,"coalProd":190,"interval":10.8},
+        {"level":11,"coalProd":240,"interval":10.8},{"level":12,"coalProd":300,"interval":10.8},
+        {"level":13,"coalProd":375,"interval":10.8},{"level":14,"coalProd":469,"interval":10.8},
+        {"level":15,"coalProd":586,"interval":10.8},{"level":16,"coalProd":733,"interval":10.8},
+        {"level":17,"coalProd":916,"interval":10.8},{"level":18,"coalProd":1145,"interval":10.8},
+        {"level":19,"coalProd":1431,"interval":10.8},{"level":20,"coalProd":1789,"interval":10.8},
+        {"level":21,"coalProd":2236,"interval":10.8},{"level":22,"coalProd":2795,"interval":10.8},
+        {"level":23,"coalProd":3494,"interval":10.8},{"level":24,"coalProd":4368,"interval":10.8},
+        {"level":25,"coalProd":5460,"interval":10.8},{"level":26,"coalProd":6825,"interval":10.8},
+        {"level":27,"coalProd":8531,"interval":10.8},{"level":28,"coalProd":10664,"interval":10.8},
+        {"level":29,"coalProd":13330,"interval":10.8},{"level":30,"coalProd":16662,"interval":10.8}
+      ]
+    },
+    "kraftwerk": {
+      "label": "Kohlekraftwerk",
+      "fields": { "eProd": "Energie", "coalCons": "Kohle", "interval": "Intervall (s)" },
+      "levels": [
+        {"level":1,"eProd":75,"coalCons":98,"interval":7.2},{"level":2,"eProd":91,"coalCons":119,"interval":7.2},
+        {"level":3,"eProd":111,"coalCons":144,"interval":7.2},{"level":4,"eProd":136,"coalCons":174,"interval":7.2},
+        {"level":5,"eProd":166,"coalCons":210,"interval":7.2},{"level":6,"eProd":202,"coalCons":254,"interval":7.2},
+        {"level":7,"eProd":247,"coalCons":307,"interval":7.2},{"level":8,"eProd":301,"coalCons":372,"interval":7.2},
+        {"level":9,"eProd":367,"coalCons":450,"interval":7.2},{"level":10,"eProd":448,"coalCons":544,"interval":7.2},
+        {"level":11,"eProd":547,"coalCons":658,"interval":7.2},{"level":12,"eProd":595,"coalCons":694,"interval":7.2},
+        {"level":13,"eProd":650,"coalCons":730,"interval":7.2},{"level":14,"eProd":793,"coalCons":883,"interval":7.2},
+        {"level":15,"eProd":968,"coalCons":1068,"interval":7.2},{"level":16,"eProd":1181,"coalCons":1293,"interval":7.2},
+        {"level":17,"eProd":1440,"coalCons":1564,"interval":7.2},{"level":18,"eProd":1757,"coalCons":1893,"interval":7.2},
+        {"level":19,"eProd":2143,"coalCons":2290,"interval":7.2},{"level":20,"eProd":2615,"coalCons":2771,"interval":7.2},
+        {"level":21,"eProd":3190,"coalCons":3353,"interval":7.2},{"level":22,"eProd":3892,"coalCons":4057,"interval":7.2},
+        {"level":23,"eProd":4748,"coalCons":4909,"interval":7.2},{"level":24,"eProd":5792,"coalCons":5939,"interval":7.2},
+        {"level":25,"eProd":7066,"coalCons":7186,"interval":7.2},{"level":26,"eProd":8620,"coalCons":8695,"interval":7.2},
+        {"level":27,"eProd":10517,"coalCons":10521,"interval":7.2},{"level":28,"eProd":12830,"coalCons":12731,"interval":7.2},
+        {"level":29,"eProd":15652,"coalCons":15404,"interval":7.2},{"level":30,"eProd":19095,"coalCons":18639,"interval":7.2}
+      ]
+    },
+    "holzofen": {
+      "label": "Holzofen",
+      "fields": { "eProd": "Energie", "woodCons": "Holz", "interval": "Intervall (s)" },
+      "levels": [
+        {"level":1,"eProd":30,"woodCons":24,"interval":14.4},{"level":2,"eProd":37,"woodCons":28,"interval":14.4},
+        {"level":3,"eProd":45,"woodCons":33,"interval":14.4},{"level":4,"eProd":55,"woodCons":39,"interval":14.4},
+        {"level":5,"eProd":67,"woodCons":46,"interval":14.4},{"level":6,"eProd":82,"woodCons":55,"interval":14.4},
+        {"level":7,"eProd":100,"woodCons":64,"interval":14.4},{"level":8,"eProd":122,"woodCons":76,"interval":14.4},
+        {"level":9,"eProd":149,"woodCons":90,"interval":14.4},{"level":10,"eProd":182,"woodCons":106,"interval":14.4},
+        {"level":11,"eProd":222,"woodCons":125,"interval":14.4},{"level":12,"eProd":241,"woodCons":135,"interval":14.4},
+        {"level":13,"eProd":260,"woodCons":146,"interval":14.4},{"level":14,"eProd":317,"woodCons":172,"interval":14.4},
+        {"level":15,"eProd":387,"woodCons":203,"interval":14.4},{"level":16,"eProd":472,"woodCons":240,"interval":14.4},
+        {"level":17,"eProd":576,"woodCons":283,"interval":14.4},{"level":18,"eProd":702,"woodCons":334,"interval":14.4},
+        {"level":19,"eProd":856,"woodCons":394,"interval":14.4},{"level":20,"eProd":1045,"woodCons":465,"interval":14.4},
+        {"level":21,"eProd":1275,"woodCons":549,"interval":14.4},{"level":22,"eProd":1556,"woodCons":648,"interval":14.4},
+        {"level":23,"eProd":1898,"woodCons":765,"interval":14.4},{"level":24,"eProd":2315,"woodCons":903,"interval":14.4},
+        {"level":25,"eProd":2824,"woodCons":1066,"interval":14.4},{"level":26,"eProd":3446,"woodCons":1258,"interval":14.4},
+        {"level":27,"eProd":4204,"woodCons":1484,"interval":14.4},{"level":28,"eProd":5129,"woodCons":1751,"interval":14.4},
+        {"level":29,"eProd":6257,"woodCons":2066,"interval":14.4},{"level":30,"eProd":7634,"woodCons":2438,"interval":14.4}
+      ]
+    },
+    "fabrik": {
+      "label": "Kaktus-Fabrik",
+      "fields": { "cProd": "Kakteen", "eCons": "Energie", "interval": "Intervall (s)" },
+      "levels": [
+        {"level":1,"cProd":240,"eCons":19,"interval":3.6},{"level":2,"cProd":293,"eCons":23,"interval":3.6},
+        {"level":3,"cProd":357,"eCons":28,"interval":3.6},{"level":4,"cProd":435,"eCons":33,"interval":3.6},
+        {"level":5,"cProd":531,"eCons":40,"interval":3.6},{"level":6,"cProd":648,"eCons":48,"interval":3.6},
+        {"level":7,"cProd":790,"eCons":58,"interval":3.6},{"level":8,"cProd":964,"eCons":69,"interval":3.6},
+        {"level":9,"cProd":1176,"eCons":83,"interval":3.6},{"level":10,"cProd":1434,"eCons":100,"interval":3.6},
+        {"level":11,"cProd":1750,"eCons":120,"interval":3.6},{"level":12,"cProd":1951,"eCons":144,"interval":3.6},
+        {"level":13,"cProd":2152,"eCons":170,"interval":3.6},{"level":14,"cProd":2625,"eCons":204,"interval":3.6},
+        {"level":15,"cProd":3203,"eCons":245,"interval":3.6},{"level":16,"cProd":3908,"eCons":294,"interval":3.6},
+        {"level":17,"cProd":4767,"eCons":353,"interval":3.6},{"level":18,"cProd":5816,"eCons":424,"interval":3.6},
+        {"level":19,"cProd":7096,"eCons":508,"interval":3.6},{"level":20,"cProd":8657,"eCons":610,"interval":3.6},
+        {"level":21,"cProd":10562,"eCons":732,"interval":3.6},{"level":22,"cProd":12886,"eCons":878,"interval":3.6},
+        {"level":23,"cProd":15721,"eCons":1054,"interval":3.6},{"level":24,"cProd":19179,"eCons":1265,"interval":3.6},
+        {"level":25,"cProd":23398,"eCons":1518,"interval":3.6},{"level":26,"cProd":28545,"eCons":1821,"interval":3.6},
+        {"level":27,"cProd":34825,"eCons":2186,"interval":3.6},{"level":28,"cProd":42487,"eCons":2623,"interval":3.6},
+        {"level":29,"cProd":51834,"eCons":3148,"interval":3.6},{"level":30,"cProd":63237,"eCons":3777,"interval":3.6}
+      ]
+    },
+    "uranBohrer": {
+      "label": "Uranbohrer",
+      "fields": { "uranProd": "Uran", "interval": "Intervall (s)" },
+      "levels": [
+        {"level":1,"uranProd":10,"interval":12.0},{"level":2,"uranProd":13,"interval":12.0},
+        {"level":3,"uranProd":16,"interval":12.0},{"level":4,"uranProd":20,"interval":12.0},
+        {"level":5,"uranProd":25,"interval":12.0},{"level":6,"uranProd":31,"interval":12.0},
+        {"level":7,"uranProd":39,"interval":12.0},{"level":8,"uranProd":49,"interval":12.0},
+        {"level":9,"uranProd":61,"interval":12.0},{"level":10,"uranProd":76,"interval":12.0},
+        {"level":11,"uranProd":95,"interval":12.0},{"level":12,"uranProd":119,"interval":12.0},
+        {"level":13,"uranProd":149,"interval":12.0},{"level":14,"uranProd":186,"interval":12.0},
+        {"level":15,"uranProd":233,"interval":12.0},{"level":16,"uranProd":291,"interval":12.0},
+        {"level":17,"uranProd":364,"interval":12.0},{"level":18,"uranProd":455,"interval":12.0},
+        {"level":19,"uranProd":569,"interval":12.0},{"level":20,"uranProd":711,"interval":12.0},
+        {"level":21,"uranProd":889,"interval":12.0},{"level":22,"uranProd":1111,"interval":12.0},
+        {"level":23,"uranProd":1389,"interval":12.0},{"level":24,"uranProd":1736,"interval":12.0},
+        {"level":25,"uranProd":2170,"interval":12.0},{"level":26,"uranProd":2713,"interval":12.0},
+        {"level":27,"uranProd":3391,"interval":12.0},{"level":28,"uranProd":4239,"interval":12.0},
+        {"level":29,"uranProd":5299,"interval":12.0},{"level":30,"uranProd":6624,"interval":12.0}
+      ]
+    },
+    "atomkw": {
+      "label": "Atomkraftwerk",
+      "fields": { "eProd": "Energie", "uranCons": "Uran", "interval": "Intervall (s)" },
+      "levels": [
+        {"level":1,"eProd":250,"uranCons":18,"interval":9.0},{"level":2,"eProd":305,"uranCons":22,"interval":9.0},
+        {"level":3,"eProd":372,"uranCons":26,"interval":9.0},{"level":4,"eProd":454,"uranCons":31,"interval":9.0},
+        {"level":5,"eProd":554,"uranCons":37,"interval":9.0},{"level":6,"eProd":676,"uranCons":45,"interval":9.0},
+        {"level":7,"eProd":824,"uranCons":54,"interval":9.0},{"level":8,"eProd":1005,"uranCons":65,"interval":9.0},
+        {"level":9,"eProd":1226,"uranCons":78,"interval":9.0},{"level":10,"eProd":1496,"uranCons":93,"interval":9.0},
+        {"level":11,"eProd":1825,"uranCons":112,"interval":9.0},{"level":12,"eProd":2227,"uranCons":134,"interval":9.0},
+        {"level":13,"eProd":2717,"uranCons":161,"interval":9.0},{"level":14,"eProd":3315,"uranCons":193,"interval":9.0},
+        {"level":15,"eProd":4044,"uranCons":232,"interval":9.0},{"level":16,"eProd":4934,"uranCons":278,"interval":9.0},
+        {"level":17,"eProd":6019,"uranCons":334,"interval":9.0},{"level":18,"eProd":7343,"uranCons":401,"interval":9.0},
+        {"level":19,"eProd":8959,"uranCons":481,"interval":9.0},{"level":20,"eProd":10930,"uranCons":577,"interval":9.0},
+        {"level":21,"eProd":13334,"uranCons":692,"interval":9.0},{"level":22,"eProd":16267,"uranCons":831,"interval":9.0},
+        {"level":23,"eProd":19846,"uranCons":997,"interval":9.0},{"level":24,"eProd":24212,"uranCons":1196,"interval":9.0},
+        {"level":25,"eProd":29538,"uranCons":1435,"interval":9.0},{"level":26,"eProd":36036,"uranCons":1722,"interval":9.0},
+        {"level":27,"eProd":43964,"uranCons":2067,"interval":9.0},{"level":28,"eProd":53636,"uranCons":2480,"interval":9.0},
+        {"level":29,"eProd":65436,"uranCons":2976,"interval":9.0},{"level":30,"eProd":79832,"uranCons":3571,"interval":9.0}
+      ]
+    }
+  }
+}
