@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+html = r"""<!DOCTYPE html>
 <html lang="de">
 <head>
 <meta charset="UTF-8">
@@ -53,6 +53,8 @@ header{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify
 .hbtn.primary{border-color:var(--green-dim);color:var(--green);}
 .hbtn.primary:hover{background:var(--green-dim);border-color:var(--green);}
 .hbtn.danger:hover{border-color:var(--red);color:var(--red);}
+.hbtn.sound-active{border-color:rgba(79,195,247,.4);color:var(--energy);}
+.hbtn.sound-muted{color:var(--text-dim);}
 .autosave-dot{width:6px;height:6px;border-radius:50%;background:var(--text-dim);transition:background .4s;flex-shrink:0;}
 .autosave-dot.saved{background:var(--green);}
 .autosave-dot.saving{background:var(--coal);}
@@ -92,10 +94,31 @@ main{position:relative;z-index:1;padding:20px 16px 0;}
 .card.partial{box-shadow:0 0 0 1px var(--coal) inset;}
 @keyframes fade-in{from{opacity:0;transform:translateY(-5px);}to{opacity:1;transform:translateY(0);}}
 .card{animation:fade-in .22s ease;}
-.card-top{display:flex;align-items:center;justify-content:space-between;padding:8px 11px;border-bottom:1px solid var(--border);}
+
+/* UPGRADE SUGGESTION */
+@keyframes upgrade-pulse{
+  0%,100%{box-shadow:0 0 0 1px var(--gold) inset,0 0 8px rgba(255,215,0,.15);}
+  50%{box-shadow:0 0 0 2px var(--gold) inset,0 0 18px rgba(255,215,0,.3);}
+}
+.card.upgrade-suggested{
+  border-color:var(--gold) !important;
+  animation:upgrade-pulse 2s ease-in-out infinite;
+}
+.upgrade-hint{display:flex;align-items:center;margin-left:auto;}
+.upgrade-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  background:var(--gold-dim);border:1px solid var(--gold);
+  color:var(--gold);font-size:8px;padding:2px 7px;
+  border-radius:3px;letter-spacing:1px;font-weight:700;
+  animation:pulse 2s ease-in-out infinite;
+  white-space:nowrap;
+}
+.upgrade-gain{font-size:7px;color:var(--text-muted);letter-spacing:1px;margin-top:2px;text-align:right;padding:0 2px 4px;}
+
+.card-top{display:flex;align-items:center;justify-content:space-between;padding:8px 11px;border-bottom:1px solid var(--border);gap:6px;}
 .card-name{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;}
 .card-icon{font-size:14px;}
-.card-btns{display:flex;gap:4px;}
+.card-btns{display:flex;gap:4px;flex-shrink:0;}
 .cbtn{background:none;border:1px solid var(--border);color:var(--text-muted);width:20px;height:20px;border-radius:4px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:all var(--tr);font-family:var(--font-m);}
 .cbtn:hover{border-color:var(--border2);color:var(--text);background:var(--surface2);}
 .cbtn.rm:hover{border-color:var(--red);color:var(--red);}
@@ -191,10 +214,37 @@ main{position:relative;z-index:1;padding:20px 16px 0;}
 .tcard-val{font-family:var(--font-d);font-size:28px;letter-spacing:1px;line-height:1;color:var(--green);}
 .tcard-sub{font-size:7px;color:var(--text-muted);margin-top:2px;letter-spacing:1px;}
 
-/* NUCLEAR GLOW EFFECT */
-@keyframes nuclear-pulse{0%,100%{box-shadow:0 0 6px var(--uran-glow);}50%{box-shadow:0 0 16px var(--uran-glow),0 0 4px var(--uran);}}
-.card.c-uran{animation:fade-in .22s ease;}
-.card.c-uran:hover{box-shadow:0 0 10px var(--uran-glow);}
+/* ══ SOUND SETTINGS MODAL ══ */
+#soundOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);z-index:160;align-items:center;justify-content:center;}
+#soundOverlay.show{display:flex;}
+.sound-panel{background:var(--surface2);border:1px solid var(--border2);border-radius:14px;width:100%;max-width:480px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.sound-title{font-family:var(--font-d);font-size:20px;letter-spacing:4px;color:var(--energy);margin-bottom:4px;}
+.sound-sub{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--text-muted);margin-bottom:20px;}
+.sound-section-label{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;}
+.sound-themes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px;}
+.sound-theme-btn{background:var(--surface3);border:1px solid var(--border2);border-radius:8px;padding:12px;cursor:pointer;transition:all var(--tr);text-align:left;}
+.sound-theme-btn:hover{border-color:var(--border2);background:var(--surface);}
+.sound-theme-btn.active{border-color:var(--energy);background:var(--energy-dim);}
+.sound-theme-btn.active-off{border-color:var(--text-dim);background:var(--bg);}
+.sth-icon{font-size:20px;margin-bottom:4px;}
+.sth-name{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text);margin-bottom:2px;}
+.sth-desc{font-size:8px;color:var(--text-muted);letter-spacing:0.5px;line-height:1.4;}
+.sound-theme-btn.active .sth-name{color:var(--energy);}
+.sound-theme-btn.active-off .sth-name{color:var(--text-dim);}
+.volume-row{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+.volume-icon{font-size:14px;flex-shrink:0;}
+input[type=range]{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--border2);outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--energy);cursor:pointer;border:2px solid var(--surface2);transition:background var(--tr);}
+input[type=range]::-webkit-slider-thumb:hover{background:var(--green);}
+.volume-val{font-family:var(--font-d);font-size:16px;color:var(--energy);letter-spacing:1px;width:36px;text-align:right;}
+.sound-test-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;}
+.stest-btn{background:var(--surface3);border:1px solid var(--border);border-radius:5px;color:var(--text-muted);font-family:var(--font-m);font-size:8px;letter-spacing:1px;padding:5px 9px;cursor:pointer;transition:all var(--tr);}
+.stest-btn:hover{border-color:var(--energy);color:var(--energy);background:var(--energy-dim);}
+.sound-close-row{display:flex;justify-content:flex-end;gap:8px;border-top:1px solid var(--border2);padding-top:14px;}
+.sbtn{background:var(--surface3);border:1px solid var(--border2);border-radius:6px;color:var(--text-muted);font-family:var(--font-m);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:7px 14px;cursor:pointer;transition:all var(--tr);}
+.sbtn:hover{border-color:var(--text-muted);color:var(--text);}
+.sbtn.primary{border-color:var(--energy);color:var(--energy);background:var(--energy-dim);}
+.sbtn.primary:hover{background:rgba(79,195,247,.2);}
 
 /* DEV MODE */
 #devTrigger{position:fixed;bottom:8px;right:10px;font-size:8px;color:var(--text-dim);cursor:pointer;user-select:none;z-index:50;letter-spacing:1px;transition:color var(--tr);}
@@ -267,19 +317,21 @@ footer{position:relative;z-index:1;text-align:center;padding:20px;font-size:8px;
 
 <header>
   <div class="logo">
-    <div class="logo-emoji">🌵</div>
-    <div class="logo-text"><h1>Kaktus-Tycoon Rechner</h1><p>Cytooxien · Fabrik Optimizer</p></div>
+    <div class="logo-emoji">&#127803;</div>
+    <div class="logo-text"><h1>Kaktus-Tycoon Rechner</h1><p>Cytooxien &middot; Fabrik Optimizer</p></div>
   </div>
   <div class="header-mid">
-    <div class="json-badge loading" id="jsonBadge"><div class="json-dot"></div><span id="jsonBadgeText">Lade Stufen-Daten…</span></div>
+    <div class="json-badge loading" id="jsonBadge"><div class="json-dot"></div><span id="jsonBadgeText">Lade Stufen-Daten&#8230;</span></div>
   </div>
   <div class="header-right">
     <div class="save-controls">
       <div class="autosave-dot" id="autosaveDot"></div>
-      <button class="hbtn primary" onclick="exportJSON()">💾 Export</button>
-      <button class="hbtn" onclick="document.getElementById('fileImportInput').click()">📂 Import</button>
+      <button class="hbtn primary" onclick="exportJSON()">&#128190; Export</button>
+      <button class="hbtn" onclick="document.getElementById('fileImportInput').click()">&#128194; Import</button>
       <div class="save-divider"></div>
-      <button class="hbtn danger" onclick="confirmReset()">↺ Reset</button>
+      <button class="hbtn sound-active" id="soundBtn" onclick="openSoundSettings()" title="Sound-Einstellungen">&#128266; Sound</button>
+      <div class="save-divider"></div>
+      <button class="hbtn danger" onclick="confirmReset()">&#8634; Reset</button>
     </div>
     <div class="live-block">
       <div class="live-rate" id="hdrRate">0.00</div>
@@ -289,23 +341,69 @@ footer{position:relative;z-index:1;text-align:center;padding:20px;font-size:8px;
 </header>
 <input type="file" id="fileImportInput" accept=".json,application/json" onchange="importJSON(this)">
 
+<!-- SOUND SETTINGS MODAL -->
+<div id="soundOverlay">
+  <div class="sound-panel">
+    <div class="sound-title">Sound</div>
+    <div class="sound-sub">Klang-Einstellungen f&uuml;r die Fabrik</div>
+    <div class="sound-section-label">Theme</div>
+    <div class="sound-themes">
+      <div class="sound-theme-btn" id="sth-soft" onclick="selectSoundTheme('soft')">
+        <div class="sth-icon">&#127925;</div>
+        <div class="sth-name">Soft UI</div>
+        <div class="sth-desc">Sanfte Sinust&ouml;ne &mdash; angenehm und dezent</div>
+      </div>
+      <div class="sound-theme-btn" id="sth-retro" onclick="selectSoundTheme('retro')">
+        <div class="sth-icon">&#127918;</div>
+        <div class="sth-name">Retro 8-Bit</div>
+        <div class="sth-desc">Klassische Chip-Sounds &mdash; wie fr&uuml;her</div>
+      </div>
+      <div class="sound-theme-btn" id="sth-mechanical" onclick="selectSoundTheme('mechanical')">
+        <div class="sth-icon">&#9881;</div>
+        <div class="sth-name">Mechanisch</div>
+        <div class="sth-desc">Klicks und Rauschen &mdash; taktiles Feeling</div>
+      </div>
+      <div class="sound-theme-btn" id="sth-off" onclick="selectSoundTheme('off')">
+        <div class="sth-icon">&#128263;</div>
+        <div class="sth-name">Lautlos</div>
+        <div class="sth-desc">Kein Sound &mdash; volle Konzentration</div>
+      </div>
+    </div>
+    <div class="sound-section-label">Lautst&auml;rke</div>
+    <div class="volume-row">
+      <span class="volume-icon">&#128263;</span>
+      <input type="range" id="volumeSlider" min="0" max="100" value="40" oninput="onVolumeChange(this.value)">
+      <span class="volume-icon">&#128266;</span>
+      <span class="volume-val" id="volumeVal">40</span>
+    </div>
+    <div class="sound-section-label">Test</div>
+    <div class="sound-test-row">
+      <button class="stest-btn" onclick="SND.play('carousel_tick')">&#127925; Karussel</button>
+      <button class="stest-btn" onclick="SND.play('menu_open')">&#128200; Men&uuml; auf</button>
+      <button class="stest-btn" onclick="SND.play('menu_close')">&#128201; Men&uuml; zu</button>
+      <button class="stest-btn" onclick="SND.play('card_add')">&#10133; Karte hinzu</button>
+      <button class="stest-btn" onclick="SND.play('card_remove')">&#10060; Karte entfernt</button>
+    </div>
+    <div class="sound-close-row">
+      <button class="sbtn" onclick="closeSoundSettings()">Schlie&#223;en</button>
+      <button class="sbtn primary" onclick="saveSoundSettings();closeSoundSettings();showToast('&#10003; Sound gespeichert','ok')">Speichern</button>
+    </div>
+  </div>
+</div>
+
 <div class="alerts-panel" id="alertsPanel"></div>
 
 <main>
   <div class="flow-row">
-
-    <!-- COLUMN 1: RESSOURCEN (Kohle + Uran) -->
     <div class="flow-col">
-      <div class="col-header ch-coal"><span class="col-header-icon">⛏️</span><h2>Kohle</h2></div>
+      <div class="col-header ch-coal"><span class="col-header-icon">&#9935;</span><h2>Kohle</h2></div>
       <div id="bohrerContainer"></div>
-      <button class="add-btn" onclick="addBohrer()">＋ Kohlebohrer</button>
+      <button class="add-btn" onclick="addBohrer()">&#xFF0B; Kohlebohrer</button>
       <div class="resource-divider"></div>
-      <div class="col-header ch-uran"><span class="col-header-icon">☢️</span><h2>Uran</h2></div>
+      <div class="col-header ch-uran"><span class="col-header-icon">&#9762;</span><h2>Uran</h2></div>
       <div id="uranBohrerContainer"></div>
-      <button class="add-btn" onclick="addUranBohrer()">＋ Uranbohrer</button>
+      <button class="add-btn" onclick="addUranBohrer()">&#xFF0B; Uranbohrer</button>
     </div>
-
-    <!-- CONNECTOR: Kohle + Uran → Energie -->
     <div class="flow-connector" style="padding-top:40px;">
       <div class="connector-label conn-coal">Kohle</div>
       <div class="connector-arrow conn-coal"><div class="connector-line"></div><div class="connector-head"></div></div>
@@ -313,80 +411,73 @@ footer{position:relative;z-index:1;text-align:center;padding:20px;font-size:8px;
       <div class="connector-label conn-uran">Uran</div>
       <div class="connector-arrow conn-uran"><div class="connector-line"></div><div class="connector-head"></div></div>
     </div>
-
-    <!-- COLUMN 2: ENERGIE -->
     <div class="flow-col">
-      <div class="col-header ch-energy"><span class="col-header-icon">⚡</span><h2>Energie</h2></div>
+      <div class="col-header ch-energy"><span class="col-header-icon">&#9889;</span><h2>Energie</h2></div>
       <div id="kraftwerkContainer"></div>
-      <button class="add-btn" onclick="addKraftwerk()">＋ Kohlekraftwerk</button>
+      <button class="add-btn" onclick="addKraftwerk()">&#xFF0B; Kohlekraftwerk</button>
       <div id="atomkwContainer"></div>
-      <button class="add-btn" onclick="addAtomkw()">＋ Atomkraftwerk</button>
+      <button class="add-btn" onclick="addAtomkw()">&#xFF0B; Atomkraftwerk</button>
       <div id="holzofenContainer"></div>
-      <button class="add-btn" onclick="addHolzofen()">＋ Holzofen</button>
+      <button class="add-btn" onclick="addHolzofen()">&#xFF0B; Holzofen</button>
     </div>
-
-    <!-- CONNECTOR: Energie → Kaktus -->
     <div class="flow-connector conn-energy">
       <div class="connector-label">Energie</div>
       <div class="connector-arrow"><div class="connector-line"></div><div class="connector-head"></div></div>
     </div>
-
-    <!-- COLUMN 3: KAKTUS -->
     <div class="flow-col">
-      <div class="col-header ch-cactus"><span class="col-header-icon">🌵</span><h2>Kaktus</h2></div>
+      <div class="col-header ch-cactus"><span class="col-header-icon">&#127811;</span><h2>Kaktus</h2></div>
       <div id="sammlerContainer"></div>
       <div id="fabrikContainer"></div>
-      <button class="add-btn" onclick="addFabrik()">＋ Kaktus-Fabrik</button>
+      <button class="add-btn" onclick="addFabrik()">&#xFF0B; Kaktus-Fabrik</button>
     </div>
-
-    <!-- CONNECTOR: Output -->
     <div class="flow-connector conn-cactus">
       <div class="connector-label">Output</div>
       <div class="connector-arrow"><div class="connector-line"></div><div class="connector-head"></div></div>
     </div>
-
-    <!-- COLUMN 4: OUTPUT -->
     <div class="flow-col" style="max-width:200px;flex-shrink:0;">
-      <div class="col-header ch-output"><span class="col-header-icon">📊</span><h2>Output</h2></div>
+      <div class="col-header ch-output"><span class="col-header-icon">&#128202;</span><h2>Output</h2></div>
       <div class="card c-output">
         <div class="output-big-val" id="outBig">0.00</div>
         <div class="output-unit">Kakteen / Sek</div>
         <div class="output-stats">
-          <div class="ostat-row"><span class="ostat-label">⛏️ Kohle/s</span><span class="ostat-val rv-warn" id="oCoal">0.00</span></div>
-          <div class="ostat-row"><span class="ostat-label">☢️ Uran/s</span><span class="ostat-val rv-uran" id="oUran">0.00</span></div>
-          <div class="ostat-row"><span class="ostat-label">⚡ Energie/s</span><span class="ostat-val rv-ok" id="oEnergy">0.00</span></div>
+          <div class="ostat-row"><span class="ostat-label">&#9935; Kohle/s</span><span class="ostat-val rv-warn" id="oCoal">0.00</span></div>
+          <div class="ostat-row"><span class="ostat-label">&#9762; Uran/s</span><span class="ostat-val rv-uran" id="oUran">0.00</span></div>
+          <div class="ostat-row"><span class="ostat-label">&#9889; Energie/s</span><span class="ostat-val rv-ok" id="oEnergy">0.00</span></div>
           <div class="ostat-row" style="border-top:1px solid var(--border);margin-top:3px;padding-top:3px;">
-            <span class="ostat-label">🌿 Sammler</span><span class="ostat-val rv-ok" id="oSammler">0.00</span>
+            <span class="ostat-label">&#127807; Sammler</span><span class="ostat-val rv-ok" id="oSammler">0.00</span>
           </div>
-          <div class="ostat-row"><span class="ostat-label">🏭 Fabriken</span><span class="ostat-val rv-ok" id="oFabriken">0.00</span></div>
+          <div class="ostat-row"><span class="ostat-label">&#127981; Fabriken</span><span class="ostat-val rv-ok" id="oFabriken">0.00</span></div>
           <div class="ostat-row" style="border-top:1px solid var(--border);margin-top:3px;padding-top:3px;">
-            <span class="ostat-label" style="color:var(--text);">∑ Gesamt/s</span>
+            <span class="ostat-label" style="color:var(--text);">&#8721; Gesamt/s</span>
             <span class="ostat-val" id="oTotal" style="color:var(--green);font-size:12px;">0.00</span>
           </div>
           <div class="efficiency-bar"><div class="efficiency-fill" id="effBar" style="width:0%"></div></div>
           <div style="font-size:7px;color:var(--text-muted);text-align:right;letter-spacing:1px;margin-top:2px;">
-            Fabrik-Effizienz: <span id="effPct" style="color:var(--green)">—</span>
+            Fabrik-Effizienz: <span id="effPct" style="color:var(--green)">&#8212;</span>
+          </div>
+          <div id="upgradeTip" style="margin-top:8px;border-top:1px solid var(--border);padding-top:6px;display:none;">
+            <div style="font-size:7px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:3px;">&#11014; Upgrade-Tipp</div>
+            <div id="upgradeTipText" style="font-size:9px;color:var(--text);line-height:1.4;"></div>
           </div>
         </div>
       </div>
     </div>
-
   </div>
 </main>
 
 <div class="results-section">
-  <div class="results-header"><span style="font-size:16px">⏱</span><h2>Produktion über Zeitraum</h2></div>
+  <div class="results-header"><span style="font-size:16px">&#9201;</span><h2>Produktion &uuml;ber Zeitraum</h2></div>
   <div class="results-body">
     <div class="time-input-wrap">
-      <label>Zeiträume:</label>
+      <label>Zeitr&auml;ume:</label>
       <input type="text" id="timeInput" value="15min, 1h, 4h, 12h, 24h" oninput="refreshResults()">
-      <span class="time-hint">Einheiten: s · min · h</span>
+      <span class="time-hint">Einheiten: s &middot; min &middot; h</span>
     </div>
     <div class="time-cards" id="timeCards"></div>
   </div>
 </div>
 
-<footer>Kaktus-Tycoon Fabrik Rechner · Cytooxien · Alle Berechnungen lokal im Browser</footer>
+<footer>Kaktus-Tycoon Fabrik Rechner &middot; Cytooxien &middot; Alle Berechnungen lokal im Browser</footer>
 
 <div id="devTrigger" onclick="openPwOverlay()" title="Entwickler-Modus">v4.0</div>
 
@@ -408,9 +499,9 @@ footer{position:relative;z-index:1;text-align:center;padding:20px;font-size:8px;
       <button class="pw-key" onclick="pwKey('7')">7</button>
       <button class="pw-key" onclick="pwKey('8')">8</button>
       <button class="pw-key" onclick="pwKey('9')">9</button>
-      <button class="pw-key del" onclick="pwDel()">⌫</button>
+      <button class="pw-key del" onclick="pwDel()">&#9003;</button>
       <button class="pw-key" onclick="pwKey('0')">0</button>
-      <button class="pw-key enter" onclick="pwEnter()">✓</button>
+      <button class="pw-key enter" onclick="pwEnter()">&#10003;</button>
     </div>
     <div class="pw-error" id="pwError"></div>
     <button class="pw-close-btn" onclick="closePwOverlay()">Abbrechen</button>
@@ -420,19 +511,19 @@ footer{position:relative;z-index:1;text-align:center;padding:20px;font-size:8px;
 <div id="devModal">
   <div class="dev-panel">
     <div class="dev-header">
-      <span style="font-size:18px">⚙</span>
-      <div class="dev-title">Dev Mode — Stufen-Editor</div>
+      <span style="font-size:18px">&#9881;</span>
+      <div class="dev-title">Dev Mode &mdash; Stufen-Editor</div>
       <div class="dev-mode-badge">AKTIV</div>
       <div class="dev-header-right">
-        <button class="dev-btn gold" onclick="devDownloadJSON()">⬇ kaktus-levels.json</button>
-        <button class="dev-btn" onclick="devClearOverrides()">× Überschreibungen löschen</button>
-        <button class="dev-btn danger" onclick="closeDevModal()">✕ Schließen</button>
+        <button class="dev-btn gold" onclick="devDownloadJSON()">&#11015; kaktus-levels.json</button>
+        <button class="dev-btn" onclick="devClearOverrides()">&times; &Uuml;berschreibungen l&ouml;schen</button>
+        <button class="dev-btn danger" onclick="closeDevModal()">&#10005; Schlie&szlig;en</button>
       </div>
     </div>
     <div class="dev-body">
       <div class="dev-sidebar" id="devSidebar"></div>
       <div class="dev-main">
-        <div class="dev-tab-desc" id="devTabDesc">Maschine auswählen →</div>
+        <div class="dev-tab-desc" id="devTabDesc">Maschine ausw&auml;hlen &rarr;</div>
         <div class="dev-table-wrap">
           <table class="dev-table">
             <thead id="devThead"></thead>
@@ -442,8 +533,8 @@ footer{position:relative;z-index:1;text-align:center;padding:20px;font-size:8px;
       </div>
     </div>
     <div class="dev-footer">
-      <div class="dev-info">Änderungen werden als lokale Überschreibung gespeichert. Mit "kaktus-levels.json herunterladen" auf GitHub hochladen, damit alle die gleichen Werte haben.</div>
-      <button class="dev-btn gold" onclick="devApplyAndClose()">✓ Übernehmen &amp; Schließen</button>
+      <div class="dev-info">&#196;nderungen werden als lokale &Uuml;berschreibung gespeichert. Mit "kaktus-levels.json herunterladen" auf GitHub hochladen, damit alle die gleichen Werte haben.</div>
+      <button class="dev-btn gold" onclick="devApplyAndClose()">&#10003; &Uuml;bernehmen &amp; Schlie&szlig;en</button>
     </div>
   </div>
 </div>
@@ -461,7 +552,169 @@ const CONFIG = {
 };
 
 // ══════════════════════════════════════════════════════════
-//  EMBEDDED DEFAULT LEVEL DATA  (fallback)
+//  SOUND ENGINE  (Web Audio API — synthesized, no files)
+// ══════════════════════════════════════════════════════════
+const SND = {
+  ctx: null,
+  theme: 'soft',   // 'soft' | 'retro' | 'mechanical' | 'off'
+  vol:  0.4,
+
+  _init() {
+    if (!this.ctx) {
+      try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { return false; }
+    }
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+    return true;
+  },
+
+  // Basic sine/square/sawtooth tone
+  _tone(freq, type, dur, vol, attack = 0.008, decay = 0.08) {
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const g = this.ctx.createGain();
+    g.connect(this.ctx.destination);
+    g.gain.setValueAtTime(0, now);
+    g.gain.linearRampToValueAtTime(vol * this.vol, now + attack);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+    const o = this.ctx.createOscillator();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, now);
+    o.connect(g);
+    o.start(now);
+    o.stop(now + dur + 0.05);
+  },
+
+  // Tone with frequency sweep
+  _sweep(f0, f1, type, dur, vol) {
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const g = this.ctx.createGain();
+    g.connect(this.ctx.destination);
+    g.gain.setValueAtTime(vol * this.vol, now);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+    const o = this.ctx.createOscillator();
+    o.type = type;
+    o.frequency.setValueAtTime(f0, now);
+    o.frequency.linearRampToValueAtTime(f1, now + dur);
+    o.connect(g);
+    o.start(now);
+    o.stop(now + dur + 0.05);
+  },
+
+  // White noise burst
+  _noise(dur, vol) {
+    if (!this.ctx) return;
+    const sr = this.ctx.sampleRate;
+    const buf = this.ctx.createBuffer(1, Math.floor(sr * dur), sr);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    const src = this.ctx.createBufferSource();
+    src.buffer = buf;
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(vol * this.vol, this.ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + dur);
+    src.connect(g);
+    g.connect(this.ctx.destination);
+    src.start();
+    src.stop(this.ctx.currentTime + dur + 0.05);
+  },
+
+  // Sequence helper: play array of [freq, delay_ms]
+  _seq(notes, type, dur, vol) {
+    notes.forEach(([f, t]) => setTimeout(() => this._tone(f, type, dur, vol), t));
+  },
+
+  play(type) {
+    if (this.theme === 'off') return;
+    if (!this._init()) return;
+
+    const T = {
+      soft: {
+        carousel_tick: () => this._tone(900, 'sine', 0.06, 0.25, 0.003, 0.06),
+        menu_open:     () => { this._tone(380,'sine',0.12,0.18); this._tone(600,'sine',0.14,0.14,0.04,0.14); },
+        menu_close:    () => { this._tone(550,'sine',0.1,0.16); this._tone(340,'sine',0.12,0.12,0.04,0.1); },
+        card_add:      () => this._seq([[440,0],[550,55],[700,110]],'sine',0.18,0.2),
+        card_remove:   () => this._sweep(320, 180, 'sine', 0.15, 0.28),
+        toast_ok:      () => this._seq([[520,0],[660,70],[780,140]],'sine',0.2,0.18),
+        toast_err:     () => this._seq([[380,0],[280,90]],'sine',0.2,0.22),
+        upgrade:       () => { this._seq([[392,0],[494,65],[587,130],[784,195]],'sine',0.24,0.22); setTimeout(()=>this._tone(1046,'sine',0.35,0.18,0.01,0.3),290); },
+        devopen:       () => this._seq([[220,0],[330,50],[440,100],[550,150]],'sine',0.12,0.15),
+      },
+      retro: {
+        carousel_tick: () => this._tone(620, 'square', 0.055, 0.18, 0.001, 0.055),
+        menu_open:     () => { this._tone(330,'square',0.1,0.16); this._tone(440,'square',0.1,0.13,0.05,0.1); },
+        menu_close:    () => { this._tone(440,'square',0.08,0.16); this._tone(330,'square',0.08,0.12,0.04,0.08); },
+        card_add:      () => this._seq([[262,0],[330,45],[392,90],[523,135]],'square',0.14,0.18),
+        card_remove:   () => this._sweep(440, 110, 'square', 0.12, 0.22),
+        toast_ok:      () => this._seq([[523,0],[659,60],[784,120]],'square',0.17,0.18),
+        toast_err:     () => this._seq([[330,0],[220,80]],'square',0.18,0.22),
+        upgrade:       () => this._seq([[330,0],[415,55],[523,110],[659,165],[784,220],[1047,280]],'square',0.18,0.2),
+        devopen:       () => this._seq([[165,0],[196,40],[247,80],[330,120],[415,160]],'square',0.1,0.14),
+      },
+      mechanical: {
+        carousel_tick: () => this._noise(0.028, 0.38),
+        menu_open:     () => { this._noise(0.04, 0.28); setTimeout(()=>this._noise(0.025,0.18),55); },
+        menu_close:    () => this._noise(0.035, 0.26),
+        card_add:      () => { this._noise(0.05, 0.32); setTimeout(()=>this._tone(480,'sine',0.12,0.16,0.005,0.1),75); },
+        card_remove:   () => { this._noise(0.06, 0.3); setTimeout(()=>this._noise(0.03,0.15),70); },
+        toast_ok:      () => { this._noise(0.03,0.25); setTimeout(()=>this._tone(520,'sine',0.18,0.2,0.005,0.15),60); },
+        toast_err:     () => { this._noise(0.08,0.38); setTimeout(()=>this._noise(0.04,0.2),90); },
+        upgrade:       () => { this._noise(0.04,0.3); setTimeout(()=>{ this._seq([[440,0],[660,70],[880,140]],'sine',0.2,0.2); },60); },
+        devopen:       () => { for(let i=0;i<4;i++) setTimeout(()=>this._noise(0.03,0.22),i*50); },
+      },
+    };
+    T[this.theme]?.[type]?.();
+  },
+};
+
+// ══════════════════════════════════════════════════════════
+//  SOUND SETTINGS UI
+// ══════════════════════════════════════════════════════════
+const SND_KEY = 'kaktus-sound-v1';
+
+function loadSoundSettings() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SND_KEY) || 'null');
+    if (s) { SND.theme = s.theme ?? 'soft'; SND.vol = s.vol ?? 0.4; }
+  } catch {}
+  applySoundUI();
+}
+
+function saveSoundSettings() {
+  try { localStorage.setItem(SND_KEY, JSON.stringify({ theme: SND.theme, vol: SND.vol })); } catch {}
+}
+
+function applySoundUI() {
+  ['soft','retro','mechanical','off'].forEach(t => {
+    const el = document.getElementById('sth-' + t);
+    if (el) el.className = 'sound-theme-btn' + (SND.theme === t ? (t === 'off' ? ' active-off' : ' active') : '');
+  });
+  const sl = document.getElementById('volumeSlider');
+  const vv = document.getElementById('volumeVal');
+  if (sl) sl.value = Math.round(SND.vol * 100);
+  if (vv) vv.textContent = Math.round(SND.vol * 100);
+  const btn = document.getElementById('soundBtn');
+  if (btn) btn.className = 'hbtn ' + (SND.theme === 'off' ? 'sound-muted' : 'sound-active');
+  if (btn) btn.textContent = SND.theme === 'off' ? '\uD83D\uDD07 Sound' : '\uD83D\uDD0A Sound';
+}
+
+function selectSoundTheme(t) {
+  SND.theme = t;
+  applySoundUI();
+  SND.play('carousel_tick');
+}
+
+function onVolumeChange(v) {
+  SND.vol = v / 100;
+  document.getElementById('volumeVal').textContent = v;
+  SND.play('carousel_tick');
+}
+
+function openSoundSettings()  { SND._init(); document.getElementById('soundOverlay').classList.add('show'); }
+function closeSoundSettings() { document.getElementById('soundOverlay').classList.remove('show'); }
+
+// ══════════════════════════════════════════════════════════
+//  DEFAULT LEVEL DATA
 // ══════════════════════════════════════════════════════════
 const DEFAULT_LEVEL_DATA = {version:4,machines:{
   bohrer:{label:"Kohlebohrer",fields:{coalProd:"Kohle",interval:"Intervall (s)"},levels:[
@@ -589,7 +842,7 @@ async function fetchLevelData(){
     const r=await fetch(CONFIG.jsonUrl,{cache:'no-cache'});
     if(!r.ok) throw new Error();
     levelData=await r.json();
-    badge.className='json-badge ok'; txt.textContent='Stufen-JSON geladen ✓';
+    badge.className='json-badge ok'; txt.textContent='Stufen-JSON geladen \u2713';
   }catch{
     levelData=JSON.parse(JSON.stringify(DEFAULT_LEVEL_DATA));
     badge.className='json-badge warn'; txt.textContent='Standard-Stufen (lokal)';
@@ -613,14 +866,15 @@ const mkFabrik    =()=>({id:uid(),level:13,booster:{mult:1,hours:0}});
 const mkUranBohrer=()=>({id:uid(),level:10,booster:{mult:1,hours:0}});
 const mkAtomkw    =()=>({id:uid(),level:13,booster:{mult:1,hours:0}});
 
-function addBohrer()    {bohrerList.push(mkBohrer());    renderAll();}
-function addKraftwerk() {kraftwerkList.push(mkKraftwerk());renderAll();}
-function addHolzofen()  {holzofenList.push(mkHolzofen()); renderAll();}
-function addFabrik()    {fabrikList.push(mkFabrik());    renderAll();}
-function addUranBohrer(){uranBohrerList.push(mkUranBohrer());renderAll();}
-function addAtomkw()    {atomkwList.push(mkAtomkw());    renderAll();}
+function addBohrer()    {SND.play('card_add');bohrerList.push(mkBohrer());renderAll();}
+function addKraftwerk() {SND.play('card_add');kraftwerkList.push(mkKraftwerk());renderAll();}
+function addHolzofen()  {SND.play('card_add');holzofenList.push(mkHolzofen());renderAll();}
+function addFabrik()    {SND.play('card_add');fabrikList.push(mkFabrik());renderAll();}
+function addUranBohrer(){SND.play('card_add');uranBohrerList.push(mkUranBohrer());renderAll();}
+function addAtomkw()    {SND.play('card_add');atomkwList.push(mkAtomkw());renderAll();}
 
 function removeCard(type,id){
+  SND.play('card_remove');
   const map={bohrer:bohrerList,kraftwerk:kraftwerkList,holzofen:holzofenList,fabrik:fabrikList,uranBohrer:uranBohrerList,atomkw:atomkwList};
   const arr=map[type];if(!arr)return;
   const i=arr.findIndex(x=>x.id===id);if(i!==-1)arr.splice(i,1);
@@ -633,67 +887,48 @@ function removeCard(type,id){
 function boost(b,t){const d=b.hours*3600;return(d>0&&t<d)?b.mult:1;}
 
 function calcAtTime(tSec){
-  // Coal production
   let coalRate=0;
-  for(const b of bohrerList){
-    const v=getLevelValues('bohrer',b.level);
-    if(v&&v.interval>0) coalRate+=(v.coalProd/v.interval)*boost(b.booster,tSec);
-  }
-  // Uran production
+  for(const b of bohrerList){const v=getLevelValues('bohrer',b.level);if(v&&v.interval>0)coalRate+=(v.coalProd/v.interval)*boost(b.booster,tSec);}
   let uranRate=0;
-  for(const ub of uranBohrerList){
-    const v=getLevelValues('uranBohrer',ub.level);
-    if(v&&v.interval>0) uranRate+=(v.uranProd/v.interval)*boost(ub.booster,tSec);
-  }
+  for(const ub of uranBohrerList){const v=getLevelValues('uranBohrer',ub.level);if(v&&v.interval>0)uranRate+=(v.uranProd/v.interval)*boost(ub.booster,tSec);}
 
-  // Energy — coal plants
   let availCoal=coalRate,energyRate=0;
   const kwDetails=[];
   for(const kw of kraftwerkList){
-    const v=getLevelValues('kraftwerk',kw.level);
-    if(!v||v.interval<=0) continue;
+    const v=getLevelValues('kraftwerk',kw.level);if(!v||v.interval<=0)continue;
     const cn=v.coalCons/v.interval,ep=v.eProd/v.interval,bst=boost(kw.booster,tSec);
     const factor=cn>0?Math.min(1,availCoal/cn):1;
     availCoal=Math.max(0,availCoal-cn*factor);
-    energyRate+=ep*factor*bst;
-    kwDetails.push({id:kw.id,factor});
+    energyRate+=ep*factor*bst;kwDetails.push({id:kw.id,factor});
   }
-  // Energy — atomic plants
   let availUran=uranRate;
   const akwDetails=[];
   for(const akw of atomkwList){
-    const v=getLevelValues('atomkw',akw.level);
-    if(!v||v.interval<=0) continue;
+    const v=getLevelValues('atomkw',akw.level);if(!v||v.interval<=0)continue;
     const un=v.uranCons/v.interval,ep=v.eProd/v.interval,bst=boost(akw.booster,tSec);
     const factor=un>0?Math.min(1,availUran/un):1;
     availUran=Math.max(0,availUran-un*factor);
-    energyRate+=ep*factor*bst;
-    akwDetails.push({id:akw.id,factor});
+    energyRate+=ep*factor*bst;akwDetails.push({id:akw.id,factor});
   }
-  // Energy — wood ovens
   const ofenDetails=[];
   for(const o of holzofenList){
-    const v=getLevelValues('holzofen',o.level);
-    if(!v||v.interval<=0) continue;
+    const v=getLevelValues('holzofen',o.level);if(!v||v.interval<=0)continue;
     const burnR=v.woodCons/v.interval;
     const woodDur=burnR>0&&o.initialWood>0?o.initialWood/burnR:0;
     const active=woodDur>0&&tSec<woodDur;
-    if(active) energyRate+=(v.eProd/v.interval)*boost(o.booster,tSec);
+    if(active)energyRate+=(v.eProd/v.interval)*boost(o.booster,tSec);
     ofenDetails.push({id:o.id,active,remaining:Math.max(0,woodDur-tSec)});
   }
 
-  // Cactus
   const sammlerRate=sammler.rate*boost(sammler.booster,tSec);
   let availEnergy=energyRate,fabrikRate=0;
   const fabDetails=[];
   for(const f of fabrikList){
-    const v=getLevelValues('fabrik',f.level);
-    if(!v||v.interval<=0) continue;
+    const v=getLevelValues('fabrik',f.level);if(!v||v.interval<=0)continue;
     const en=v.eCons/v.interval,cp=v.cProd/v.interval,bst=boost(f.booster,tSec);
     const factor=en>0?Math.min(1,availEnergy/en):1;
     availEnergy=Math.max(0,availEnergy-en*factor);
-    fabrikRate+=cp*factor*bst;
-    fabDetails.push({id:f.id,factor});
+    fabrikRate+=cp*factor*bst;fabDetails.push({id:f.id,factor});
   }
   return{cactusRate:sammlerRate+fabrikRate,sammlerRate,fabrikRate,coalRate,uranRate,energyRate,kwDetails,akwDetails,ofenDetails,fabDetails};
 }
@@ -704,10 +939,7 @@ function getBreakpoints(T){
   for(const el of all){const bp=el.booster?.hours*3600;if(bp>0&&bp<T)bps.add(bp);}
   for(const o of holzofenList){
     const v=getLevelValues('holzofen',o.level);
-    if(v&&v.interval>0&&v.woodCons>0&&o.initialWood>0){
-      const wd=o.initialWood/(v.woodCons/v.interval);
-      if(wd>0&&wd<T)bps.add(wd);
-    }
+    if(v&&v.interval>0&&v.woodCons>0&&o.initialWood>0){const wd=o.initialWood/(v.woodCons/v.interval);if(wd>0&&wd<T)bps.add(wd);}
   }
   return[...bps].sort((a,b)=>a-b);
 }
@@ -725,15 +957,126 @@ function parseTime(s){
   if(m[2]==='h'||m[2]==='std')return v*3600;if(m[2]==='min')return v*60;return v;
 }
 function fmtBig(n){
-  if(!isFinite(n))return'∞';
+  if(!isFinite(n))return'\u221e';
   if(n>=1e12)return(n/1e12).toFixed(2)+' B';if(n>=1e9)return(n/1e9).toFixed(2)+' Mrd';
   if(n>=1e6)return(n/1e6).toFixed(2)+' Mio';if(n>=1e3)return(n/1e3).toFixed(1)+' K';
   return n.toFixed(0);
 }
 function fmtDur(s){
-  if(!isFinite(s)||s<=0)return'—';
+  if(!isFinite(s)||s<=0)return'\u2014';
   const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=Math.floor(s%60);
   if(h>0)return`${h}h ${m}min`;if(m>0)return`${m}min ${sec}s`;return`${sec}s`;
+}
+function fmtRate(n){return n>=1000?fmtBig(n):n.toFixed(2);}
+
+// ══════════════════════════════════════════════════════════
+//  UPGRADE SUGGESTION
+// ══════════════════════════════════════════════════════════
+const MACHINE_LABELS = {
+  bohrer:'Kohlebohrer', uranBohrer:'Uranbohrer',
+  kraftwerk:'Kohlekraftwerk', atomkw:'Atomkraftwerk',
+  holzofen:'Holzofen', fabrik:'Kaktus-Fabrik'
+};
+
+let _lastSugId = null;
+
+function computeUpgradeSuggestion() {
+  if (!levelData) return null;
+
+  // Build candidate list: all machines with level < max
+  const candidates = [
+    ...bohrerList.map(m => ({m, type:'bohrer'})),
+    ...uranBohrerList.map(m => ({m, type:'uranBohrer'})),
+    ...kraftwerkList.map(m => ({m, type:'kraftwerk'})),
+    ...atomkwList.map(m => ({m, type:'atomkw'})),
+    ...holzofenList.map(m => ({m, type:'holzofen'})),
+    ...fabrikList.map(m => ({m, type:'fabrik'})),
+  ].filter(({m}) => m.level < CONFIG.maxLevel);
+
+  if (!candidates.length) return null;
+
+  const baseline = calcAtTime(0).cactusRate;
+  let best = null;
+
+  for (const {m, type} of candidates) {
+    const old = m.level;
+    m.level = old + 1;
+    const improved = calcAtTime(0).cactusRate;
+    m.level = old;
+    const gain = improved - baseline;
+    if (!best || gain > best.gain) {
+      best = { id: m.id, type, fromLevel: old, toLevel: old + 1, gain, machine: m };
+    }
+  }
+
+  if (!best || best.gain < 0.0001) return null;
+
+  // Find optimal target: keep advancing best machine until marginal gain
+  // falls below the best alternative's +1 gain (with 10% tolerance)
+  const { machine: bm, type: bt } = best;
+  let targetLevel = best.toLevel;
+
+  // Best alternative gain (excluding our chosen machine)
+  const altBest = candidates
+    .filter(({m}) => m.id !== bm.id)
+    .reduce((acc, {m, type}) => {
+      const old = m.level;
+      m.level = old + 1;
+      const g = calcAtTime(0).cactusRate - baseline;
+      m.level = old;
+      return g > acc ? g : acc;
+    }, 0);
+
+  for (let lv = best.toLevel + 1; lv <= CONFIG.maxLevel; lv++) {
+    const prevRate = (() => { const o=bm.level; bm.level=lv-1; const r=calcAtTime(0).cactusRate; bm.level=o; return r; })();
+    const nextRate = (() => { const o=bm.level; bm.level=lv;   const r=calcAtTime(0).cactusRate; bm.level=o; return r; })();
+    const marginalGain = nextRate - prevRate;
+    if (marginalGain >= altBest * 0.85) {
+      targetLevel = lv;
+    } else {
+      break;
+    }
+  }
+
+  return { id: best.id, type: best.type, fromLevel: best.fromLevel, toLevel: targetLevel, gain: best.gain };
+}
+
+function applyUpgradeSuggestion(sug) {
+  // Remove previous highlights
+  document.querySelectorAll('.card.upgrade-suggested').forEach(c => c.classList.remove('upgrade-suggested'));
+  document.querySelectorAll('.upgrade-hint').forEach(h => { h.innerHTML = ''; h.title = ''; });
+  document.getElementById('upgradeTip').style.display = 'none';
+
+  if (!sug) { _lastSugId = null; return; }
+
+  // Highlight card
+  const card = document.querySelector(`.card[data-type="${sug.type}"][data-id="${sug.id}"]`);
+  if (card) {
+    card.classList.add('upgrade-suggested');
+    const hint = card.querySelector('.upgrade-hint');
+    if (hint) {
+      const levels = sug.toLevel > sug.fromLevel + 1
+        ? `${sug.fromLevel}\u2192${sug.toLevel}`
+        : `Stufe ${sug.toLevel}`;
+      hint.innerHTML = `<span class="upgrade-badge">\u2B06 ${levels}</span>`;
+      hint.title = `+${fmtRate(sug.gain)} Kaktus/s durch dieses Upgrade`;
+    }
+    // Gain annotation below level info
+    const gainEl = card.querySelector('.upgrade-gain');
+    if (gainEl) gainEl.textContent = `\u2192 +${fmtRate(sug.gain)} Kaktus/s`;
+  }
+
+  // Output panel tip
+  const tip = document.getElementById('upgradeTip');
+  const tipTxt = document.getElementById('upgradeTipText');
+  if (tip && tipTxt) {
+    const lbl = MACHINE_LABELS[sug.type] || sug.type;
+    const levels = sug.toLevel > sug.fromLevel + 1
+      ? `Stufe ${sug.fromLevel} \u2192 ${sug.toLevel}`
+      : `auf Stufe ${sug.toLevel}`;
+    tipTxt.innerHTML = `<strong>${lbl}</strong> ${levels}<br><span style="color:var(--green)">+${fmtRate(sug.gain)}/s</span> mehr Kakteen`;
+    tip.style.display = 'block';
+  }
 }
 
 // ══════════════════════════════════════════════════════════
@@ -755,27 +1098,22 @@ function updateDisplay(){
   const sbr=document.getElementById('sammler-boosted');
   if(sbr)sbr.textContent=r.sammlerRate.toFixed(2);
 
-  // Efficiency
   const fabMax=fabrikList.reduce((s,f)=>{const v=getLevelValues('fabrik',f.level);return s+(v&&v.interval>0?v.cProd/v.interval:0);},0);
   const eff=fabMax>0?Math.min(100,(r.fabrikRate/fabMax)*100):0;
   const bar=document.getElementById('effBar');
   bar.style.width=eff.toFixed(1)+'%';bar.style.background=eff>80?'var(--green)':eff>40?'var(--coal)':'var(--red)';
   const ep=document.getElementById('effPct');
-  ep.textContent=fabMax>0?eff.toFixed(0)+'%':'—';ep.style.color=eff>80?'var(--green)':eff>40?'var(--coal)':'var(--red)';
+  ep.textContent=fabMax>0?eff.toFixed(0)+'%':'\u2014';ep.style.color=eff>80?'var(--green)':eff>40?'var(--coal)':'var(--red)';
 
-  // Alerts
   const alerts=[];
-  for(const f of r.fabDetails){if(f.factor===0)alerts.push({t:'danger',m:'Kaktus-Fabrik produziert NICHTS — kein Strom'});else if(f.factor<0.99)alerts.push({t:'warn',m:`Kaktus-Fabrik auf ${(f.factor*100).toFixed(0)}% — Energiemangel`});}
-  for(const kw of r.kwDetails){if(kw.factor===0)alerts.push({t:'danger',m:'Kohlekraftwerk: kein Strom — kein Kohle-Nachschub'});else if(kw.factor<0.99)alerts.push({t:'warn',m:`Kohlekraftwerk auf ${(kw.factor*100).toFixed(0)}% — Kohlemangel`});}
-  for(const akw of r.akwDetails){if(akw.factor===0)alerts.push({t:'uran',m:'Atomkraftwerk: kein Strom — kein Uran-Nachschub'});else if(akw.factor<0.99)alerts.push({t:'uran',m:`Atomkraftwerk auf ${(akw.factor*100).toFixed(0)}% — Uranmangel`});}
+  for(const f of r.fabDetails){if(f.factor===0)alerts.push({t:'danger',m:'Kaktus-Fabrik produziert NICHTS \u2014 kein Strom'});else if(f.factor<0.99)alerts.push({t:'warn',m:`Kaktus-Fabrik auf ${(f.factor*100).toFixed(0)}% \u2014 Energiemangel`});}
+  for(const kw of r.kwDetails){if(kw.factor===0)alerts.push({t:'danger',m:'Kohlekraftwerk: kein Strom \u2014 kein Kohle-Nachschub'});else if(kw.factor<0.99)alerts.push({t:'warn',m:`Kohlekraftwerk auf ${(kw.factor*100).toFixed(0)}% \u2014 Kohlemangel`});}
+  for(const akw of r.akwDetails){if(akw.factor===0)alerts.push({t:'uran',m:'Atomkraftwerk: kein Strom \u2014 kein Uran-Nachschub'});else if(akw.factor<0.99)alerts.push({t:'uran',m:`Atomkraftwerk auf ${(akw.factor*100).toFixed(0)}% \u2014 Uranmangel`});}
   for(const o of r.ofenDetails){if(!o.active)alerts.push({t:'info',m:'Holzofen: Holz aufgebraucht'});else if(o.remaining<3600)alerts.push({t:'warn',m:`Holzofen: Holz reicht noch ca. ${fmtDur(o.remaining)}`});}
-  document.getElementById('alertsPanel').innerHTML=alerts.map(a=>`<div class="alert-box ${a.t}">⚠ ${a.m}</div>`).join('');
+  document.getElementById('alertsPanel').innerHTML=alerts.map(a=>`<div class="alert-box ${a.t}">\u26A0 ${a.m}</div>`).join('');
 
-  // Rate minis — coal drills
   for(const b of bohrerList){const v=getLevelValues('bohrer',b.level);const el=document.querySelector(`[data-rate="br-${b.id}"]`);if(el)el.textContent=(v&&v.interval>0?v.coalProd/v.interval:0).toFixed(2);}
-  // Rate minis — uran drills
   for(const ub of uranBohrerList){const v=getLevelValues('uranBohrer',ub.level);const el=document.querySelector(`[data-rate="ub-${ub.id}"]`);if(el)el.textContent=(v&&v.interval>0?v.uranProd/v.interval:0).toFixed(2);}
-  // Rate minis — coal plants
   for(const kw of kraftwerkList){
     const v=getLevelValues('kraftwerk',kw.level),fd=r.kwDetails.find(x=>x.id===kw.id);
     const e1=document.querySelector(`[data-rate="kw-e-${kw.id}"]`),e2=document.querySelector(`[data-rate="kw-c-${kw.id}"]`);
@@ -784,7 +1122,6 @@ function updateDisplay(){
     const card=document.querySelector(`.card[data-id="${kw.id}"]`);
     if(card){card.classList.toggle('partial',fd?.factor<0.99&&fd?.factor>0);card.classList.toggle('bottleneck',fd?.factor===0);}
   }
-  // Rate minis — atomic plants
   for(const akw of atomkwList){
     const v=getLevelValues('atomkw',akw.level),fd=r.akwDetails.find(x=>x.id===akw.id);
     const e1=document.querySelector(`[data-rate="akw-e-${akw.id}"]`),e2=document.querySelector(`[data-rate="akw-u-${akw.id}"]`);
@@ -793,14 +1130,12 @@ function updateDisplay(){
     const card=document.querySelector(`.card[data-id="${akw.id}"]`);
     if(card){card.classList.toggle('partial',fd?.factor<0.99&&fd?.factor>0);card.classList.toggle('bottleneck',fd?.factor===0);}
   }
-  // Rate minis — wood ovens
   for(const o of holzofenList){
     const v=getLevelValues('holzofen',o.level),od=r.ofenDetails.find(x=>x.id===o.id);
     const e1=document.querySelector(`[data-rate="of-e-${o.id}"]`),e2=document.querySelector(`[data-rate="of-w-${o.id}"]`);
     if(e1)e1.textContent=(v&&v.interval>0?v.eProd/v.interval:0).toFixed(2);
-    if(e2){e2.textContent=od?fmtDur(od.remaining):'—';e2.className='rate-val '+(od?.active===false?'rv-bad':od?.remaining<3600?'rv-warn':'rv-ok');}
+    if(e2){e2.textContent=od?fmtDur(od.remaining):'\u2014';e2.className='rate-val '+(od?.active===false?'rv-bad':od?.remaining<3600?'rv-warn':'rv-ok');}
   }
-  // Rate minis — factories
   for(const f of fabrikList){
     const v=getLevelValues('fabrik',f.level),fd=r.fabDetails.find(x=>x.id===f.id);
     const e1=document.querySelector(`[data-rate="fb-c-${f.id}"]`),e2=document.querySelector(`[data-rate="fb-e-${f.id}"]`);
@@ -809,6 +1144,10 @@ function updateDisplay(){
     const card=document.querySelector(`.card[data-id="${f.id}"]`);
     if(card){card.classList.toggle('partial',fd?.factor<0.99&&fd?.factor>0);card.classList.toggle('bottleneck',fd?.factor===0);}
   }
+
+  // Upgrade suggestion (runs after all rate-minis are updated)
+  applyUpgradeSuggestion(computeUpgradeSuggestion());
+
   refreshResults();
 }
 
@@ -837,9 +1176,9 @@ function carouselHTML(type,id,currentLevel){
         <span class="level-current-badge" id="lcb-${type}-${id}">${currentLevel}</span>
       </div>
       <div class="carousel-row">
-        <button class="car-arrow" data-dir="-1" data-ctype="${type}" data-cid="${id}">◀</button>
+        <button class="car-arrow" data-dir="-1" data-ctype="${type}" data-cid="${id}">\u25C0</button>
         <div class="car-vp"><div class="car-strip" id="cs-${type}-${id}">${items}</div></div>
-        <button class="car-arrow" data-dir="1" data-ctype="${type}" data-cid="${id}">▶</button>
+        <button class="car-arrow" data-dir="1" data-ctype="${type}" data-cid="${id}">\u25B6</button>
       </div>
     </div>`;
 }
@@ -853,7 +1192,9 @@ function centerStrip(strip){
 
 function setLevel(type,id,level){
   const obj=findObj(type,id);if(!obj)return;
+  const old=obj.level;
   obj.level=Math.max(1,Math.min(CONFIG.maxLevel,level));
+  if(obj.level!==old) SND.play('carousel_tick');
   const strip=document.getElementById(`cs-${type}-${id}`);
   if(strip){strip.querySelectorAll('.car-item').forEach(i=>i.classList.toggle('active',parseInt(i.dataset.lv)===obj.level));centerStrip(strip);}
   const badge=document.getElementById(`lcb-${type}-${id}`);if(badge)badge.textContent=obj.level;
@@ -870,7 +1211,7 @@ function buildLevelInfoHTML(type,level){
   const colorMap={coalProd:'lv-coal',eProd:'lv-energy',coalCons:'lv-coal',woodCons:'lv-wood',cProd:'lv-cactus',eCons:'lv-energy',uranProd:'lv-uran',uranCons:'lv-uran'};
   const prodFields=Object.entries(m.fields).filter(([k])=>k!=='interval');
   let rows=prodFields.map(([k,label])=>`<div class="li-row"><span class="li-label">${label} / Intervall</span><span class="li-val ${colorMap[k]||''}">${(v[k]||0).toLocaleString('de-DE')}</span></div>`).join('');
-  rows+=`<div class="li-interval-row"><span class="li-label">Intervall</span><span class="li-val lv-interval">${v.interval??'—'}s</span></div>`;
+  rows+=`<div class="li-interval-row"><span class="li-label">Intervall</span><span class="li-val lv-interval">${v.interval??'\u2014'}s</span></div>`;
   return rows;
 }
 
@@ -881,12 +1222,12 @@ function boosterHTML(el,type){
   const id=el.id,has=el.booster.mult>1&&el.booster.hours>0;
   return `
     <div class="bst-toggle${has?' active open':''}">
-      🚀 Booster ${has?`<span class="bst-badge">× ${el.booster.mult}  ${el.booster.hours}h</span>`:''}
-      <span class="bst-chevron">▾</span>
+      \uD83D\uDE80 Booster ${has?`<span class="bst-badge">\u00D7 ${el.booster.mult}  ${el.booster.hours}h</span>`:''}
+      <span class="bst-chevron">\u25BE</span>
     </div>
     <div class="bst-body${has?' open':''}">
       <div class="frow">
-        <div class="field"><label>Multiplikator (×)</label>
+        <div class="field"><label>Multiplikator (\u00D7)</label>
           <input type="number" min="1" step="0.1" value="${el.booster.mult}"
             data-bind="1" data-type="${type}" data-id="${id}" data-field="booster.mult">
         </div>
@@ -905,7 +1246,9 @@ function renderSammler(){
   const el=sammler;
   document.getElementById('sammlerContainer').innerHTML=`
     <div class="card c-cactus" data-type="sammler" data-id="sammler">
-      <div class="card-top"><div class="card-name"><span class="card-icon">🌿</span> Kaktus-Sammler</div></div>
+      <div class="card-top">
+        <div class="card-name"><span class="card-icon">\uD83C\uDF3F</span> Kaktus-Sammler</div>
+      </div>
       <div class="card-body">
         <div class="frow">
           <div class="field">
@@ -925,18 +1268,23 @@ function renderSammler(){
     </div>`;
 }
 
+const _cardTop = (icon, label, type, id) => `
+  <div class="card-top">
+    <div class="card-name"><span class="card-icon">${icon}</span> ${label}</div>
+    <div class="upgrade-hint" id="uh-${type}-${id}"></div>
+    <div class="card-btns"><button class="cbtn rm" onclick="removeCard('${type}',${id})">&#10005;</button></div>
+  </div>`;
+
 function renderBohrerCard(b){return`
   <div class="card c-coal" data-type="bohrer" data-id="${b.id}">
-    <div class="card-top">
-      <div class="card-name"><span class="card-icon">⛏️</span> Kohlebohrer</div>
-      <div class="card-btns"><button class="cbtn rm" onclick="removeCard('bohrer',${b.id})">✕</button></div>
-    </div>
+    ${_cardTop('\u26CF\uFE0F','Kohlebohrer','bohrer',b.id)}
     <div class="card-body">
       ${carouselHTML('bohrer',b.id,b.level)}
       <div class="level-info" id="li-bohrer-${b.id}">${buildLevelInfoHTML('bohrer',b.level)}</div>
+      <div class="upgrade-gain" id="ug-bohrer-${b.id}"></div>
       <div class="rate-mini">
         <div class="rate-row"><span class="rate-label">Kohle/s</span>
-          <span class="rate-val rv-warn" data-rate="br-${b.id}">—</span></div>
+          <span class="rate-val rv-warn" data-rate="br-${b.id}">\u2014</span></div>
       </div>
       ${boosterHTML(b,'bohrer')}
     </div>
@@ -944,16 +1292,14 @@ function renderBohrerCard(b){return`
 
 function renderUranBohrerCard(ub){return`
   <div class="card c-uran" data-type="uranBohrer" data-id="${ub.id}">
-    <div class="card-top">
-      <div class="card-name"><span class="card-icon">☢️</span> Uranbohrer</div>
-      <div class="card-btns"><button class="cbtn rm" onclick="removeCard('uranBohrer',${ub.id})">✕</button></div>
-    </div>
+    ${_cardTop('\u2622\uFE0F','Uranbohrer','uranBohrer',ub.id)}
     <div class="card-body">
       ${carouselHTML('uranBohrer',ub.id,ub.level)}
       <div class="level-info" id="li-uranBohrer-${ub.id}">${buildLevelInfoHTML('uranBohrer',ub.level)}</div>
+      <div class="upgrade-gain" id="ug-uranBohrer-${ub.id}"></div>
       <div class="rate-mini">
         <div class="rate-row"><span class="rate-label">Uran/s</span>
-          <span class="rate-val rv-uran" data-rate="ub-${ub.id}">—</span></div>
+          <span class="rate-val rv-uran" data-rate="ub-${ub.id}">\u2014</span></div>
       </div>
       ${boosterHTML(ub,'uranBohrer')}
     </div>
@@ -961,18 +1307,16 @@ function renderUranBohrerCard(ub){return`
 
 function renderKraftwerkCard(kw){return`
   <div class="card c-energy" data-type="kraftwerk" data-id="${kw.id}">
-    <div class="card-top">
-      <div class="card-name"><span class="card-icon">🏭</span> Kohlekraftwerk</div>
-      <div class="card-btns"><button class="cbtn rm" onclick="removeCard('kraftwerk',${kw.id})">✕</button></div>
-    </div>
+    ${_cardTop('\uD83C\uDFED','Kohlekraftwerk','kraftwerk',kw.id)}
     <div class="card-body">
       ${carouselHTML('kraftwerk',kw.id,kw.level)}
       <div class="level-info" id="li-kraftwerk-${kw.id}">${buildLevelInfoHTML('kraftwerk',kw.level)}</div>
+      <div class="upgrade-gain" id="ug-kraftwerk-${kw.id}"></div>
       <div class="rate-mini">
         <div class="rate-row"><span class="rate-label">Energie/s (aktuell)</span>
-          <span class="rate-val rv-ok" data-rate="kw-e-${kw.id}">—</span></div>
-        <div class="rate-row"><span class="rate-label">Kohle benötigt/s</span>
-          <span class="rate-val rv-warn" data-rate="kw-c-${kw.id}">—</span></div>
+          <span class="rate-val rv-ok" data-rate="kw-e-${kw.id}">\u2014</span></div>
+        <div class="rate-row"><span class="rate-label">Kohle ben\u00f6tigt/s</span>
+          <span class="rate-val rv-warn" data-rate="kw-c-${kw.id}">\u2014</span></div>
       </div>
       ${boosterHTML(kw,'kraftwerk')}
     </div>
@@ -980,18 +1324,16 @@ function renderKraftwerkCard(kw){return`
 
 function renderAtomkwCard(akw){return`
   <div class="card c-uran" data-type="atomkw" data-id="${akw.id}">
-    <div class="card-top">
-      <div class="card-name"><span class="card-icon">⚛️</span> Atomkraftwerk</div>
-      <div class="card-btns"><button class="cbtn rm" onclick="removeCard('atomkw',${akw.id})">✕</button></div>
-    </div>
+    ${_cardTop('\u269B\uFE0F','Atomkraftwerk','atomkw',akw.id)}
     <div class="card-body">
       ${carouselHTML('atomkw',akw.id,akw.level)}
       <div class="level-info" id="li-atomkw-${akw.id}">${buildLevelInfoHTML('atomkw',akw.level)}</div>
+      <div class="upgrade-gain" id="ug-atomkw-${akw.id}"></div>
       <div class="rate-mini">
         <div class="rate-row"><span class="rate-label">Energie/s (aktuell)</span>
-          <span class="rate-val rv-ok" data-rate="akw-e-${akw.id}">—</span></div>
-        <div class="rate-row"><span class="rate-label">Uran benötigt/s</span>
-          <span class="rate-val rv-uran" data-rate="akw-u-${akw.id}">—</span></div>
+          <span class="rate-val rv-ok" data-rate="akw-e-${akw.id}">\u2014</span></div>
+        <div class="rate-row"><span class="rate-label">Uran ben\u00f6tigt/s</span>
+          <span class="rate-val rv-uran" data-rate="akw-u-${akw.id}">\u2014</span></div>
       </div>
       ${boosterHTML(akw,'atomkw')}
     </div>
@@ -999,24 +1341,22 @@ function renderAtomkwCard(akw){return`
 
 function renderHolzofenCard(o){return`
   <div class="card c-energy" data-type="holzofen" data-id="${o.id}">
-    <div class="card-top">
-      <div class="card-name"><span class="card-icon">🔥</span> Holzofen</div>
-      <div class="card-btns"><button class="cbtn rm" onclick="removeCard('holzofen',${o.id})">✕</button></div>
-    </div>
+    ${_cardTop('\uD83D\uDD25','Holzofen','holzofen',o.id)}
     <div class="card-body">
       ${carouselHTML('holzofen',o.id,o.level)}
       <div class="level-info" id="li-holzofen-${o.id}">${buildLevelInfoHTML('holzofen',o.level)}</div>
+      <div class="upgrade-gain" id="ug-holzofen-${o.id}"></div>
       <div class="frow">
-        <div class="field"><label>🪵 Holz im Lager</label>
+        <div class="field"><label>\uD83E\uDEB5 Holz im Lager</label>
           <input type="number" min="0" value="${o.initialWood}"
             data-bind="1" data-type="holzofen" data-id="${o.id}" data-field="initialWood">
         </div>
       </div>
       <div class="rate-mini">
         <div class="rate-row"><span class="rate-label">Energie/s</span>
-          <span class="rate-val rv-ok" data-rate="of-e-${o.id}">—</span></div>
-        <div class="rate-row"><span class="rate-label">Holz reicht für</span>
-          <span class="rate-val rv-warn" data-rate="of-w-${o.id}">—</span></div>
+          <span class="rate-val rv-ok" data-rate="of-e-${o.id}">\u2014</span></div>
+        <div class="rate-row"><span class="rate-label">Holz reicht f\u00fcr</span>
+          <span class="rate-val rv-warn" data-rate="of-w-${o.id}">\u2014</span></div>
       </div>
       ${boosterHTML(o,'holzofen')}
     </div>
@@ -1024,18 +1364,16 @@ function renderHolzofenCard(o){return`
 
 function renderFabrikCard(f){return`
   <div class="card c-cactus" data-type="fabrik" data-id="${f.id}">
-    <div class="card-top">
-      <div class="card-name"><span class="card-icon">🌵</span> Kaktus-Fabrik</div>
-      <div class="card-btns"><button class="cbtn rm" onclick="removeCard('fabrik',${f.id})">✕</button></div>
-    </div>
+    ${_cardTop('\uD83C\uDF35','Kaktus-Fabrik','fabrik',f.id)}
     <div class="card-body">
       ${carouselHTML('fabrik',f.id,f.level)}
       <div class="level-info" id="li-fabrik-${f.id}">${buildLevelInfoHTML('fabrik',f.level)}</div>
+      <div class="upgrade-gain" id="ug-fabrik-${f.id}"></div>
       <div class="rate-mini">
         <div class="rate-row"><span class="rate-label">Kaktus/s (aktuell)</span>
-          <span class="rate-val rv-ok" data-rate="fb-c-${f.id}">—</span></div>
-        <div class="rate-row"><span class="rate-label">Energie benötigt/s</span>
-          <span class="rate-val rv-warn" data-rate="fb-e-${f.id}">—</span></div>
+          <span class="rate-val rv-ok" data-rate="fb-c-${f.id}">\u2014</span></div>
+        <div class="rate-row"><span class="rate-label">Energie ben\u00f6tigt/s</span>
+          <span class="rate-val rv-warn" data-rate="fb-e-${f.id}">\u2014</span></div>
       </div>
       ${boosterHTML(f,'fabrik')}
     </div>
@@ -1052,6 +1390,7 @@ function renderAll(){
   document.getElementById('holzofenContainer').innerHTML  =holzofenList.map(renderHolzofenCard).join('');
   document.getElementById('fabrikContainer').innerHTML    =fabrikList.map(renderFabrikCard).join('');
   renderSammler();
+  _lastSugId = null; // reset so upgrade sound can re-fire after full re-render
   requestAnimationFrame(()=>{document.querySelectorAll('.car-strip').forEach(s=>centerStrip(s));updateDisplay();});
   autoSave();
 }
@@ -1061,16 +1400,27 @@ function renderAll(){
 // ══════════════════════════════════════════════════════════
 document.addEventListener('click',e=>{
   const item=e.target.closest('.car-item');
-  if(item){const c=item.closest('[data-carousel]');const parts=c.dataset.carousel.split('-');const t=parts.slice(0,-1).join('-');const i=parts[parts.length-1];setLevel(t,isNaN(i)?i:parseInt(i),parseInt(item.dataset.lv));return;}
+  if(item){
+    const c=item.closest('[data-carousel]');
+    const parts=c.dataset.carousel.split('-');
+    const t=parts.slice(0,-1).join('-');const i=parts[parts.length-1];
+    setLevel(t,isNaN(i)?i:parseInt(i),parseInt(item.dataset.lv));return;
+  }
   const arrow=e.target.closest('.car-arrow');
   if(arrow){
     const t=arrow.dataset.ctype,i=arrow.dataset.cid;
     const obj=findObj(t,isNaN(i)?i:parseInt(i));
-    if(obj)setLevel(t,isNaN(i)?i:parseInt(i),obj.level+parseInt(arrow.dataset.dir));
-    return;
+    if(obj)setLevel(t,isNaN(i)?i:parseInt(i),obj.level+parseInt(arrow.dataset.dir));return;
   }
   const bst=e.target.closest('.bst-toggle');
-  if(bst){const body=bst.nextElementSibling;if(body?.classList.contains('bst-body')){const o=body.classList.toggle('open');bst.classList.toggle('open',o);}}
+  if(bst){
+    const body=bst.nextElementSibling;
+    if(body?.classList.contains('bst-body')){
+      const o=body.classList.toggle('open');
+      bst.classList.toggle('open',o);
+      SND.play(o ? 'menu_open' : 'menu_close');
+    }
+  }
 });
 
 document.addEventListener('wheel',e=>{
@@ -1096,7 +1446,7 @@ document.addEventListener('change',e=>{
   if(field.startsWith('booster')){
     const toggle=inp.closest('.bst-body')?.previousElementSibling;
     if(toggle){const o=findObj(type,id),badge=toggle.querySelector('.bst-badge');
-      if(o?.booster.mult>1&&o?.booster.hours>0){if(badge)badge.textContent=`× ${o.booster.mult}  ${o.booster.hours}h`;else{const b=document.createElement('span');b.className='bst-badge';b.textContent=`× ${o.booster.mult}  ${o.booster.hours}h`;toggle.insertBefore(b,toggle.querySelector('.bst-chevron'));}toggle.classList.add('active');}
+      if(o?.booster.mult>1&&o?.booster.hours>0){if(badge)badge.textContent=`\u00D7 ${o.booster.mult}  ${o.booster.hours}h`;else{const b=document.createElement('span');b.className='bst-badge';b.textContent=`\u00D7 ${o.booster.mult}  ${o.booster.hours}h`;toggle.insertBefore(b,toggle.querySelector('.bst-chevron'));}toggle.classList.add('active');}
       else{if(badge)badge.remove();toggle.classList.remove('active');}
     }
   }
@@ -1134,21 +1484,25 @@ function autoSave(){
   clearTimeout(_saveTimer);_saveTimer=setTimeout(()=>{try{localStorage.setItem(STATE_KEY,JSON.stringify(getSnapshot()));if(dot)dot.className='autosave-dot saved';setTimeout(()=>{if(dot)dot.className='autosave-dot';},1800);}catch{if(dot)dot.className='autosave-dot';}},400);
 }
 function tryLoadSaved(){try{const r=localStorage.getItem(STATE_KEY);if(!r)return false;return applySnapshot(JSON.parse(r));}catch{return false;}}
-
 function exportJSON(){
-  try{const snap=getSnapshot();snap.exportedAt=new Date().toISOString();const blob=new Blob([JSON.stringify(snap,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`kaktus-config_${new Date().toISOString().slice(0,16).replace('T','_').replace(':','-')}.json`;a.click();URL.revokeObjectURL(a.href);showToast('✓ Exportiert','ok');}catch{showToast('Export fehlgeschlagen','err');}
+  try{const snap=getSnapshot();snap.exportedAt=new Date().toISOString();const blob=new Blob([JSON.stringify(snap,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`kaktus-config_${new Date().toISOString().slice(0,16).replace('T','_').replace(':','-')}.json`;a.click();URL.revokeObjectURL(a.href);showToast('\u2713 Exportiert','ok');}catch{showToast('Export fehlgeschlagen','err');}
 }
 function importJSON(input){
   const file=input.files[0];if(!file)return;
   const reader=new FileReader();
-  reader.onload=e=>{try{const s=JSON.parse(e.target.result);if(applySnapshot(s)){renderAll();showToast('✓ Konfiguration geladen','ok');}else showToast('Ungültige Datei','err');}catch{showToast('Fehler beim Lesen','err');}input.value='';};
+  reader.onload=e=>{try{const s=JSON.parse(e.target.result);if(applySnapshot(s)){renderAll();showToast('\u2713 Konfiguration geladen','ok');}else showToast('Ung\u00fcltige Datei','err');}catch{showToast('Fehler beim Lesen','err');}input.value='';};
   reader.readAsText(file);
 }
-function confirmReset(){if(!confirm('Alle Eingaben zurücksetzen?'))return;localStorage.removeItem(STATE_KEY);loadDefaults();renderAll();showToast('Zurückgesetzt','ok');}
+function confirmReset(){if(!confirm('Alle Eingaben zur\u00fccksetzen?'))return;localStorage.removeItem(STATE_KEY);loadDefaults();renderAll();showToast('Zur\u00fcckgesetzt','ok');}
 
 // TOAST
 let _toastTimer=null;
-function showToast(msg,type=''){const el=document.getElementById('toast');if(!el)return;el.textContent=msg;el.className='toast show '+type;clearTimeout(_toastTimer);_toastTimer=setTimeout(()=>{el.className='toast';},2600);}
+function showToast(msg,type=''){
+  const el=document.getElementById('toast');if(!el)return;
+  el.textContent=msg;el.className='toast show '+type;
+  if(type==='ok')SND.play('toast_ok');else if(type==='err')SND.play('toast_err');
+  clearTimeout(_toastTimer);_toastTimer=setTimeout(()=>{el.className='toast';},2600);
+}
 
 // ══════════════════════════════════════════════════════════
 //  PASSWORD / DEV MODE
@@ -1157,11 +1511,11 @@ let devModeActive=false,pwInput='';
 function openPwOverlay(){if(devModeActive){openDevModal();return;}pwInput='';updatePwDots();document.getElementById('pwError').textContent='';document.getElementById('pwOverlay').classList.add('show');}
 function closePwOverlay(){document.getElementById('pwOverlay').classList.remove('show');pwInput='';updatePwDots();}
 function updatePwDots(){for(let i=0;i<4;i++)document.getElementById(`pd${i}`).className='pw-dot'+(i<pwInput.length?' filled':'');}
-function pwKey(k){if(pwInput.length>=4)return;pwInput+=k;updatePwDots();if(pwInput.length===4)setTimeout(pwEnter,80);}
+function pwKey(k){if(pwInput.length>=4)return;SND.play('carousel_tick');pwInput+=k;updatePwDots();if(pwInput.length===4)setTimeout(pwEnter,80);}
 function pwDel(){pwInput=pwInput.slice(0,-1);updatePwDots();}
 function pwEnter(){
-  if(pwInput===CONFIG.devPassword){devModeActive=true;document.getElementById('devTrigger').classList.add('active-dev');document.getElementById('devTrigger').textContent='⚙ DEV';closePwOverlay();openDevModal();showToast('🔓 Dev Mode aktiviert','gold');}
-  else{document.getElementById('pwError').textContent='FALSCHER CODE';pwInput='';updatePwDots();}
+  if(pwInput===CONFIG.devPassword){devModeActive=true;document.getElementById('devTrigger').classList.add('active-dev');document.getElementById('devTrigger').textContent='\u2699 DEV';closePwOverlay();openDevModal();SND.play('devopen');showToast('\uD83D\uDD13 Dev Mode aktiviert','gold');}
+  else{SND.play('toast_err');document.getElementById('pwError').textContent='FALSCHER CODE';pwInput='';updatePwDots();}
 }
 
 // ══════════════════════════════════════════════════════════
@@ -1176,26 +1530,25 @@ function openDevModal(){
   const machines=Object.entries(levelData.machines);
   machines.forEach(([key,m])=>{
     const tab=document.createElement('div');tab.className='dev-tab'+(devCurrentMachine===key?' active':'');
-    tab.textContent=m.label;tab.onclick=()=>devSelectMachine(key);sidebar.appendChild(tab);
+    tab.textContent=m.label;tab.onclick=()=>{SND.play('menu_open');devSelectMachine(key);};sidebar.appendChild(tab);
   });
   if(!devCurrentMachine&&machines.length>0)devSelectMachine(machines[0][0]);
   document.getElementById('devModal').classList.add('show');
 }
-function closeDevModal(){document.getElementById('devModal').classList.remove('show');}
+function closeDevModal(){SND.play('menu_close');document.getElementById('devModal').classList.remove('show');}
 
 function devSelectMachine(key){
   devCurrentMachine=key;
   document.querySelectorAll('.dev-tab').forEach(t=>t.classList.toggle('active',t.textContent===levelData.machines[key].label));
   const m=levelData.machines[key];
-  document.getElementById('devTabDesc').textContent=`${m.label} · Stufen 1–${CONFIG.maxLevel} · Intervall ist pro Stufe einstellbar`;
+  document.getElementById('devTabDesc').textContent=`${m.label} \u00b7 Stufen 1\u2013${CONFIG.maxLevel} \u00b7 Intervall ist pro Stufe einstellbar`;
   const prodFields=Object.entries(m.fields).filter(([k])=>k!=='interval');
   const thead=document.getElementById('devThead'),tbody=document.getElementById('devTbody');
   thead.innerHTML=`<tr><th class="lv-col">Stufe</th>${prodFields.map(([k,l])=>`<th>${l}</th>`).join('')}<th class="iv-col">Intervall (s)</th></tr>`;
   tbody.innerHTML='';
   for(let lv=1;lv<=CONFIG.maxLevel;lv++){
     const base=m.levels.find(l=>l.level===lv)||{};
-    const ov=devEdits[key]?.[lv]||{};
-    const isModified=Object.keys(ov).length>0;
+    const ov=devEdits[key]?.[lv]||{};const isModified=Object.keys(ov).length>0;
     const tr=document.createElement('tr');if(isModified)tr.classList.add('modified');
     let tds=`<td class="lv-num">${lv}</td>`;
     for(const[f] of prodFields){
@@ -1207,7 +1560,6 @@ function devSelectMachine(key){
     tr.innerHTML=tds;tbody.appendChild(tr);
   }
 }
-
 function devFieldChange(inp){
   const key=inp.dataset.devMachine,lv=parseInt(inp.dataset.devLevel),field=inp.dataset.devField;
   const val=parseFloat(inp.value)||0;
@@ -1217,7 +1569,6 @@ function devFieldChange(inp){
   else{devEdits[key][lv][field]=val;inp.classList.add('modified');}
   inp.closest('tr').classList.toggle('modified',Object.keys(devEdits[key]?.[lv]||{}).length>0);
 }
-
 function devApplyAndClose(){
   const overrides={};
   for(const[mk,lvEdits] of Object.entries(devEdits)){
@@ -1228,18 +1579,16 @@ function devApplyAndClose(){
       if(entry)Object.assign(entry,fields);
     }
   }
-  saveLocalOverrides(overrides);closeDevModal();renderAll();showToast('✓ Stufen-Werte übernommen','gold');
+  saveLocalOverrides(overrides);closeDevModal();renderAll();showToast('\u2713 Stufen-Werte \u00fcbernommen','gold');
 }
-
 function devClearOverrides(){
-  if(!confirm('Alle lokalen Wert-Überschreibungen löschen?'))return;
+  if(!confirm('Alle lokalen Wert-\u00dcberschreibungen l\u00f6schen?'))return;
   localStorage.removeItem(OVERRIDE_KEY);
   levelData=JSON.parse(JSON.stringify(DEFAULT_LEVEL_DATA));
   Object.keys(devEdits).forEach(k=>delete devEdits[k]);
   closeDevModal();devCurrentMachine=null;
-  fetchLevelData().then(()=>renderAll());showToast('Überschreibungen gelöscht','ok');
+  fetchLevelData().then(()=>renderAll());showToast('\u00dcberschreibungen gel\u00f6scht','ok');
 }
-
 function devDownloadJSON(){
   const output=JSON.parse(JSON.stringify(levelData));
   output.updated=new Date().toISOString().slice(0,10);
@@ -1248,7 +1597,7 @@ function devDownloadJSON(){
     for(const[lv,fields] of Object.entries(lvEdits)){const entry=output.machines[mk]?.levels.find(l=>l.level===parseInt(lv));if(entry)Object.assign(entry,fields);}
   const blob=new Blob([JSON.stringify(output,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='kaktus-levels.json';a.click();URL.revokeObjectURL(a.href);
-  showToast('✓ kaktus-levels.json heruntergeladen','gold');
+  showToast('\u2713 kaktus-levels.json heruntergeladen','gold');
 }
 
 // ══════════════════════════════════════════════════════════
@@ -1265,14 +1614,21 @@ function loadDefaults(){
 }
 
 (async()=>{
+  loadSoundSettings();
   await fetchLevelData();
   const restored=tryLoadSaved();
   if(!restored)loadDefaults();
   renderAll();
-  if(restored)setTimeout(()=>showToast('✓ Letzter Stand wiederhergestellt','ok'),300);
+  if(restored)setTimeout(()=>showToast('\u2713 Letzter Stand wiederhergestellt','ok'),300);
 })();
 
 document.getElementById('timeInput')?.addEventListener('input',refreshResults);
 </script>
 </body>
-</html>
+</html>"""
+
+with open('/home/claude/kaktus-tycoon/kaktus-tycoon-rechner.html', 'w', encoding='utf-8') as f:
+    f.write(html)
+print("Written:", len(html), "chars")
+PYEOF
+python3 /tmp/build_html.py
