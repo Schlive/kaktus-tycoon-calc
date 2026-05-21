@@ -8,1108 +8,904 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:          #0a0c12;
-  --surface:     #111420;
-  --surface2:    #181c2a;
-  --surface3:    #1e2234;
-  --border:      #252a3d;
-  --border2:     #2f3652;
+  --bg:#0a0c12; --surface:#111420; --surface2:#181c2a; --surface3:#1e2234;
+  --border:#252a3d; --border2:#2f3652;
+  --green:#3de87a; --green2:#28bf5e; --green-dim:#0f3d25; --green-glow:rgba(61,232,122,.12);
+  --coal:#f5a623; --coal-dim:#3d2a09;
+  --energy:#4fc3f7; --energy-dim:#0a3344;
+  --uran:#e879f9; --uran-dim:#3a0a45; --uran-glow:rgba(232,121,249,.12);
+  --red:#f05454; --red-dim:#3d1212;
+  --gold:#ffd700; --gold-dim:#3d3300;
+  --wood:#8b6914; --wood-dim:#2a1f06;
+  --text:#d8dce8; --text-muted:#5a6080; --text-dim:#3a4060;
+  --font-d:'Bebas Neue','Arial Black',sans-serif;
+  --font-m:'JetBrains Mono','Courier New',monospace;
+  --radius:8px; --tr:.18s ease;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-m);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(61,232,122,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(61,232,122,.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
 
-  --green:       #3de87a;
-  --green2:      #28bf5e;
-  --green-dim:   #0f3d25;
-  --green-glow:  rgba(61,232,122,0.12);
+/* HEADER */
+header{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:10px 24px;background:rgba(10,12,18,.94);border-bottom:1px solid var(--border);backdrop-filter:blur(16px);gap:16px;flex-wrap:wrap;}
+.logo{display:flex;align-items:center;gap:12px;}
+.logo-emoji{font-size:28px;line-height:1;}
+.logo-text h1{font-family:var(--font-d);font-size:24px;letter-spacing:3px;color:var(--green);line-height:1;}
+.logo-text p{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--text-muted);margin-top:1px;}
+.header-mid{display:flex;align-items:center;gap:8px;flex:1;justify-content:center;}
+.header-right{display:flex;align-items:center;gap:20px;}
+.live-block{display:flex;flex-direction:column;align-items:flex-end;}
+.live-rate{font-family:var(--font-d);font-size:32px;letter-spacing:2px;line-height:1;color:var(--green);transition:color var(--tr);}
+.live-rate.warn{color:var(--coal);}
+.live-label{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--text-muted);}
+.json-badge{display:inline-flex;align-items:center;gap:5px;font-size:8px;padding:4px 8px;border-radius:4px;letter-spacing:1px;border:1px solid;}
+.json-badge.ok{background:var(--green-dim);border-color:var(--green);color:var(--green);}
+.json-badge.warn{background:var(--coal-dim);border-color:var(--coal);color:var(--coal);}
+.json-badge.loading{background:var(--surface2);border-color:var(--border2);color:var(--text-muted);}
+.json-dot{width:5px;height:5px;border-radius:50%;background:currentColor;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.json-badge.loading .json-dot{animation:pulse 1s infinite;}
+.save-controls{display:flex;align-items:center;gap:6px;}
+.save-divider{width:1px;height:24px;background:var(--border2);margin:0 2px;}
+.hbtn{display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;color:var(--text-muted);font-family:var(--font-m);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:5px 9px;cursor:pointer;transition:all var(--tr);white-space:nowrap;}
+.hbtn:hover{border-color:var(--text-muted);color:var(--text);background:var(--surface3);}
+.hbtn.primary{border-color:var(--green-dim);color:var(--green);}
+.hbtn.primary:hover{background:var(--green-dim);border-color:var(--green);}
+.hbtn.danger:hover{border-color:var(--red);color:var(--red);}
+.autosave-dot{width:6px;height:6px;border-radius:50%;background:var(--text-dim);transition:background .4s;flex-shrink:0;}
+.autosave-dot.saved{background:var(--green);}
+.autosave-dot.saving{background:var(--coal);}
+#fileImportInput{display:none;}
 
-  --coal:        #f5a623;
-  --coal-dim:    #3d2a09;
-  --coal-glow:   rgba(245,166,35,0.12);
+/* LAYOUT */
+main{position:relative;z-index:1;padding:20px 16px 0;}
+.flow-row{display:flex;gap:0;align-items:flex-start;width:100%;min-height:400px;}
+.flow-col{flex:1;min-width:0;padding:0 5px;}
+.flow-connector{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:50px;width:52px;flex-shrink:0;gap:4px;}
+.connector-label{font-size:7px;letter-spacing:2px;text-transform:uppercase;text-align:center;}
+.connector-arrow{display:flex;align-items:center;width:44px;}
+.connector-line{flex:1;height:2px;position:relative;overflow:visible;}
+.connector-line::after{content:'';position:absolute;inset:0;border-top:2px dashed currentColor;}
+.connector-head{width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:8px solid currentColor;flex-shrink:0;}
+.conn-coal{color:var(--coal);} .conn-energy{color:var(--energy);} .conn-cactus{color:var(--green);} .conn-uran{color:var(--uran);}
+.col-header{display:flex;align-items:center;gap:7px;padding:5px 8px 8px;margin-bottom:8px;border-bottom:2px solid var(--border2);}
+.col-header-icon{font-size:16px;}
+.col-header h2{font-family:var(--font-d);font-size:15px;letter-spacing:3px;text-transform:uppercase;}
+.ch-coal{border-color:var(--coal);}.ch-coal h2{color:var(--coal);}
+.ch-uran{border-color:var(--uran);}.ch-uran h2{color:var(--uran);}
+.ch-energy{border-color:var(--energy);}.ch-energy h2{color:var(--energy);}
+.ch-cactus{border-color:var(--green);}.ch-cactus h2{color:var(--green);}
+.ch-output{border-color:var(--border2);}.ch-output h2{color:var(--text-muted);}
+.resource-divider{height:1px;background:var(--border2);margin:10px 0 14px;position:relative;}
+.resource-divider::after{content:'RESSOURCEN';position:absolute;top:-7px;left:50%;transform:translateX(-50%);background:var(--bg);padding:0 6px;font-size:7px;letter-spacing:3px;color:var(--text-dim);}
 
-  --energy:      #4fc3f7;
-  --energy-dim:  #0a3344;
-  --energy-glow: rgba(79,195,247,0.12);
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden;transition:border-color var(--tr),box-shadow var(--tr);}
+.card:hover{border-color:var(--border2);}
+.card.c-coal{border-left:3px solid var(--coal);}
+.card.c-uran{border-left:3px solid var(--uran);}
+.card.c-energy{border-left:3px solid var(--energy);}
+.card.c-cactus{border-left:3px solid var(--green);}
+.card.c-output{border-left:3px solid var(--green);background:var(--surface2);}
+.card.bottleneck{box-shadow:0 0 0 1px var(--red) inset;border-color:var(--red);}
+.card.partial{box-shadow:0 0 0 1px var(--coal) inset;}
+@keyframes fade-in{from{opacity:0;transform:translateY(-5px);}to{opacity:1;transform:translateY(0);}}
+.card{animation:fade-in .22s ease;}
+.card-top{display:flex;align-items:center;justify-content:space-between;padding:8px 11px;border-bottom:1px solid var(--border);}
+.card-name{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;}
+.card-icon{font-size:14px;}
+.card-btns{display:flex;gap:4px;}
+.cbtn{background:none;border:1px solid var(--border);color:var(--text-muted);width:20px;height:20px;border-radius:4px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:all var(--tr);font-family:var(--font-m);}
+.cbtn:hover{border-color:var(--border2);color:var(--text);background:var(--surface2);}
+.cbtn.rm:hover{border-color:var(--red);color:var(--red);}
+.card-body{padding:10px 11px;}
 
-  --red:         #f05454;
-  --red-dim:     #3d1212;
+/* LEVEL CAROUSEL */
+.level-block{margin-bottom:8px;}
+.level-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+.level-head-label{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);}
+.level-current-badge{font-family:var(--font-d);font-size:20px;color:var(--green);letter-spacing:1px;line-height:1;}
+.carousel-row{display:flex;align-items:center;gap:5px;}
+.car-arrow{background:none;border:1px solid var(--border);color:var(--text-muted);width:22px;height:22px;border-radius:4px;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all var(--tr);font-family:var(--font-m);}
+.car-arrow:hover{border-color:var(--border2);color:var(--text);background:var(--surface2);}
+.car-vp{flex:1;overflow:hidden;position:relative;height:34px;mask-image:linear-gradient(to right,transparent,black 18%,black 82%,transparent);-webkit-mask-image:linear-gradient(to right,transparent,black 18%,black 82%,transparent);}
+.car-strip{display:flex;gap:3px;height:34px;align-items:center;transition:transform .22s cubic-bezier(.25,.46,.45,.94);will-change:transform;}
+.car-item{flex-shrink:0;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:5px;font-size:9px;font-weight:700;cursor:pointer;color:var(--text-muted);border:1px solid transparent;transition:color .12s,border-color .12s,background .12s,transform .18s,width .18s,height .18s,font-size .18s;user-select:none;}
+.car-item:hover{color:var(--text);background:var(--surface2);}
+.car-item.active{color:var(--green);border-color:var(--green);background:var(--green-dim);font-size:12px;width:32px;height:32px;}
+.c-uran .car-item.active{color:var(--uran);border-color:var(--uran);background:var(--uran-dim);}
+.c-uran .level-current-badge{color:var(--uran);}
 
-  --text:        #d8dce8;
-  --text-muted:  #5a6080;
-  --text-dim:    #3a4060;
+/* LEVEL INFO */
+.level-info{background:var(--bg);border-radius:4px;padding:6px 8px;display:flex;flex-direction:column;gap:3px;margin-bottom:6px;}
+.li-row{display:flex;justify-content:space-between;align-items:center;}
+.li-label{font-size:8px;color:var(--text-muted);letter-spacing:1px;}
+.li-val{font-size:10px;font-weight:700;}
+.lv-coal{color:var(--coal);} .lv-energy{color:var(--energy);} .lv-cactus{color:var(--green);}
+.lv-wood{color:var(--wood);} .lv-interval{color:var(--text-muted);}
+.lv-uran{color:var(--uran);}
+.li-interval-row{display:flex;justify-content:space-between;align-items:center;margin-top:2px;padding-top:2px;border-top:1px solid var(--border);}
 
-  --font-d: 'Bebas Neue', 'Arial Black', sans-serif;
-  --font-m: 'JetBrains Mono', 'Courier New', monospace;
+/* RATE MINI */
+.rate-mini{background:var(--bg);border-radius:4px;padding:4px 7px;margin-bottom:6px;font-size:8px;display:flex;flex-direction:column;gap:2px;}
+.rate-row{display:flex;justify-content:space-between;align-items:center;}
+.rate-label{color:var(--text-muted);}
+.rate-val{font-weight:700;}
+.rv-ok{color:var(--green);} .rv-warn{color:var(--coal);} .rv-bad{color:var(--red);} .rv-uran{color:var(--uran);}
 
-  --radius: 8px;
-  --transition: 0.18s ease;
-}
+/* FIELDS */
+.field{display:flex;flex-direction:column;gap:3px;}
+.field label{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);}
+.field input[type=number]{background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--font-m);font-size:12px;font-weight:600;padding:6px 8px;width:100%;transition:border-color var(--tr);-moz-appearance:textfield;}
+.field input[type=number]::-webkit-inner-spin-button,.field input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
+.field input[type=number]:focus{outline:none;border-color:var(--green);}
+.frow{display:flex;gap:7px;margin-bottom:7px;flex-wrap:wrap;}
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* BOOSTER */
+.bst-toggle{display:flex;align-items:center;gap:5px;padding:5px 0 0;border-top:1px solid var(--border);margin-top:5px;cursor:pointer;user-select:none;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);transition:color var(--tr);}
+.bst-toggle:hover{color:var(--text);}
+.bst-toggle.active{color:var(--green);}
+.bst-badge{margin-left:4px;background:var(--green-dim);color:var(--green);font-size:8px;padding:1px 5px;border-radius:3px;letter-spacing:1px;}
+.bst-chevron{margin-left:auto;transition:transform var(--tr);}
+.bst-toggle.open .bst-chevron{transform:rotate(180deg);}
+.bst-body{display:none;padding-top:7px;}
+.bst-body.open{display:block;}
 
-html { scroll-behavior: smooth; }
+/* ADD BUTTON */
+.add-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;background:none;border:1px dashed var(--border);color:var(--text-muted);font-family:var(--font-m);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:7px;border-radius:var(--radius);cursor:pointer;margin-bottom:7px;transition:all var(--tr);}
+.add-btn:hover{border-color:var(--border2);color:var(--text);background:var(--surface2);}
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-m);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
+/* OUTPUT */
+.output-big-val{font-family:var(--font-d);font-size:42px;letter-spacing:2px;line-height:1;color:var(--green);text-align:center;padding:12px 0 3px;}
+.output-unit{text-align:center;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;}
+.output-stats{border-top:1px solid var(--border);padding:9px 11px;display:flex;flex-direction:column;gap:3px;}
+.ostat-row{display:flex;justify-content:space-between;align-items:center;font-size:9px;}
+.ostat-label{color:var(--text-muted);}
+.ostat-val{font-weight:700;}
+.efficiency-bar{margin-top:7px;height:3px;border-radius:2px;background:var(--border);overflow:hidden;}
+.efficiency-fill{height:100%;border-radius:2px;background:var(--green);transition:width .4s ease,background .4s ease;}
 
-/* ── Grid texture ── */
-body::before {
-  content: '';
-  position: fixed; inset: 0;
-  background-image:
-    linear-gradient(rgba(61,232,122,0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(61,232,122,0.025) 1px, transparent 1px);
-  background-size: 48px 48px;
-  pointer-events: none;
-  z-index: 0;
-}
+/* ALERTS */
+.alerts-panel{position:relative;z-index:1;margin:12px 16px 0;display:flex;gap:7px;flex-wrap:wrap;}
+.alert-box{display:flex;align-items:center;gap:7px;padding:6px 10px;border-radius:var(--radius);font-size:8px;letter-spacing:1px;font-weight:600;border:1px solid;}
+.alert-box.warn{background:var(--coal-dim);border-color:var(--coal);color:var(--coal);}
+.alert-box.danger{background:var(--red-dim);border-color:var(--red);color:var(--red);}
+.alert-box.info{background:var(--energy-dim);border-color:var(--energy);color:var(--energy);}
+.alert-box.uran{background:var(--uran-dim);border-color:var(--uran);color:var(--uran);}
 
-/* ══════════════════════════════════════
-   HEADER
-══════════════════════════════════════ */
-header {
-  position: sticky; top: 0; z-index: 100;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 28px;
-  background: rgba(10,12,18,0.92);
-  border-bottom: 1px solid var(--border);
-  backdrop-filter: blur(16px);
-}
+/* RESULTS */
+.results-section{position:relative;z-index:1;margin:18px 16px 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.results-header{padding:10px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px;}
+.results-header h2{font-family:var(--font-d);font-size:17px;letter-spacing:3px;color:var(--green);}
+.results-body{padding:14px 18px;}
+.time-input-wrap{display:flex;align-items:center;gap:9px;margin-bottom:12px;flex-wrap:wrap;}
+.time-input-wrap label{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);white-space:nowrap;}
+.time-input-wrap input{flex:1;min-width:200px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--font-m);font-size:11px;padding:6px 11px;transition:border-color var(--tr);}
+.time-input-wrap input:focus{outline:none;border-color:var(--green);}
+.time-hint{font-size:8px;color:var(--text-muted);letter-spacing:1px;}
+.time-cards{display:flex;gap:9px;flex-wrap:wrap;}
+.tcard{flex:1;min-width:110px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px;text-align:center;transition:border-color var(--tr);}
+.tcard:hover{border-color:var(--border2);}
+.tcard-period{font-size:8px;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px;}
+.tcard-val{font-family:var(--font-d);font-size:28px;letter-spacing:1px;line-height:1;color:var(--green);}
+.tcard-sub{font-size:7px;color:var(--text-muted);margin-top:2px;letter-spacing:1px;}
 
-.logo {
-  display: flex; align-items: center; gap: 14px;
-}
-.logo-emoji { font-size: 30px; line-height: 1; }
-.logo-text h1 {
-  font-family: var(--font-d);
-  font-size: 26px; letter-spacing: 3px;
-  color: var(--green); line-height: 1;
-}
-.logo-text p {
-  font-size: 9px; letter-spacing: 4px;
-  text-transform: uppercase; color: var(--text-muted);
-  margin-top: 1px;
-}
+/* NUCLEAR GLOW EFFECT */
+@keyframes nuclear-pulse{0%,100%{box-shadow:0 0 6px var(--uran-glow);}50%{box-shadow:0 0 16px var(--uran-glow),0 0 4px var(--uran);}}
+.card.c-uran{animation:fade-in .22s ease;}
+.card.c-uran:hover{box-shadow:0 0 10px var(--uran-glow);}
 
-.header-right {
-  display: flex; align-items: center; gap: 32px;
-}
+/* DEV MODE */
+#devTrigger{position:fixed;bottom:8px;right:10px;font-size:8px;color:var(--text-dim);cursor:pointer;user-select:none;z-index:50;letter-spacing:1px;transition:color var(--tr);}
+#devTrigger:hover{color:var(--text-muted);}
+#devTrigger.active-dev{color:var(--gold);letter-spacing:2px;}
+#pwOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:200;align-items:center;justify-content:center;}
+#pwOverlay.show{display:flex;}
+.pw-box{background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:28px 32px;min-width:260px;text-align:center;}
+.pw-title{font-family:var(--font-d);font-size:22px;letter-spacing:3px;color:var(--gold);margin-bottom:4px;}
+.pw-sub{font-size:9px;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;margin-bottom:20px;}
+.pw-dots{display:flex;gap:8px;justify-content:center;margin-bottom:18px;}
+.pw-dot{width:10px;height:10px;border-radius:50%;background:var(--border2);transition:background .15s;}
+.pw-dot.filled{background:var(--gold);}
+.pw-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.pw-key{background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font-d);font-size:20px;letter-spacing:1px;padding:10px;cursor:pointer;transition:all var(--tr);}
+.pw-key:hover{background:var(--surface);border-color:var(--border2);}
+.pw-key.del{font-size:14px;color:var(--text-muted);}
+.pw-key.enter{background:var(--gold-dim);border-color:var(--gold);color:var(--gold);}
+.pw-error{font-size:9px;color:var(--red);letter-spacing:2px;margin-top:10px;height:14px;}
+.pw-close-btn{background:none;border:none;color:var(--text-muted);font-family:var(--font-m);font-size:9px;cursor:pointer;margin-top:12px;letter-spacing:2px;text-transform:uppercase;}
+#devModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(6px);z-index:180;align-items:stretch;justify-content:center;padding:20px;}
+#devModal.show{display:flex;}
+.dev-panel{background:var(--surface2);border:1px solid var(--gold);border-radius:12px;width:100%;max-width:960px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 0 40px rgba(255,215,0,.1);}
+.dev-header{display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--border2);}
+.dev-title{font-family:var(--font-d);font-size:20px;letter-spacing:3px;color:var(--gold);}
+.dev-mode-badge{background:var(--gold-dim);border:1px solid var(--gold);color:var(--gold);font-size:8px;padding:2px 7px;border-radius:3px;letter-spacing:2px;}
+.dev-header-right{margin-left:auto;display:flex;gap:7px;}
+.dev-body{flex:1;display:flex;overflow:hidden;}
+.dev-sidebar{width:160px;flex-shrink:0;border-right:1px solid var(--border2);padding:12px 0;display:flex;flex-direction:column;gap:2px;overflow-y:auto;}
+.dev-tab{padding:8px 14px;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);cursor:pointer;transition:all var(--tr);border-left:3px solid transparent;}
+.dev-tab:hover{color:var(--text);background:var(--surface3);}
+.dev-tab.active{color:var(--gold);border-left-color:var(--gold);background:var(--gold-dim);}
+.dev-main{flex:1;overflow:hidden;display:flex;flex-direction:column;padding:14px;}
+.dev-tab-desc{font-size:8px;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;margin-bottom:10px;}
+.dev-table-wrap{flex:1;overflow-y:auto;}
+.dev-table{width:100%;border-collapse:collapse;font-size:10px;}
+.dev-table thead th{position:sticky;top:0;background:var(--surface2);padding:6px 8px;text-align:left;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border2);}
+.dev-table thead th.lv-col{color:var(--gold);}
+.dev-table thead th.iv-col{color:var(--text-muted);font-style:italic;}
+.dev-table tbody tr:hover{background:var(--surface3);}
+.dev-table tbody tr.modified td{background:rgba(255,215,0,.04);}
+.dev-table td{padding:4px 6px;border-bottom:1px solid var(--border);}
+.dev-table td.lv-num{font-family:var(--font-d);font-size:14px;color:var(--gold);letter-spacing:1px;text-align:center;width:44px;}
+.dev-table input{background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font-m);font-size:10px;font-weight:600;padding:3px 5px;width:80px;transition:border-color var(--tr);-moz-appearance:textfield;}
+.dev-table input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.dev-table input:focus{outline:none;border-color:var(--gold);}
+.dev-table input.modified{border-color:rgba(255,215,0,.5);background:var(--gold-dim);}
+.dev-footer{padding:10px 14px;border-top:1px solid var(--border2);display:flex;gap:7px;align-items:center;}
+.dev-info{font-size:8px;color:var(--text-muted);letter-spacing:1px;flex:1;}
+.dev-btn{background:var(--surface3);border:1px solid var(--border2);border-radius:5px;color:var(--text-muted);font-family:var(--font-m);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:6px 12px;cursor:pointer;transition:all var(--tr);}
+.dev-btn:hover{border-color:var(--text-muted);color:var(--text);}
+.dev-btn.gold{border-color:var(--gold);color:var(--gold);background:var(--gold-dim);}
+.dev-btn.gold:hover{background:rgba(255,215,0,.15);}
+.dev-btn.danger:hover{border-color:var(--red);color:var(--red);}
 
-.live-block {
-  display: flex; flex-direction: column; align-items: flex-end;
-}
-.live-rate {
-  font-family: var(--font-d);
-  font-size: 34px; letter-spacing: 2px; line-height: 1;
-  color: var(--green);
-  transition: color var(--transition);
-}
-.live-rate.warn { color: var(--coal); }
-.live-label {
-  font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
-  color: var(--text-muted);
-}
+/* TOAST */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--surface3);border:1px solid var(--border2);color:var(--text);font-family:var(--font-m);font-size:10px;padding:8px 16px;border-radius:6px;letter-spacing:1px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:9999;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.ok{border-color:var(--green);color:var(--green);}
+.toast.err{border-color:var(--red);color:var(--red);}
+.toast.gold{border-color:var(--gold);color:var(--gold);}
 
-/* ── Save / Load controls ── */
-.save-controls {
-  display: flex; align-items: center; gap: 8px;
-}
-.save-controls .divider {
-  width: 1px; height: 28px;
-  background: var(--border2);
-  margin: 0 4px;
-}
-.hbtn {
-  display: flex; align-items: center; gap: 6px;
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  border-radius: 6px;
-  color: var(--text-muted);
-  font-family: var(--font-m); font-size: 9px; font-weight: 700;
-  letter-spacing: 2px; text-transform: uppercase;
-  padding: 6px 10px;
-  cursor: pointer;
-  transition: all var(--transition);
-  white-space: nowrap;
-}
-.hbtn:hover { border-color: var(--text-muted); color: var(--text); background: var(--surface3); }
-.hbtn.primary { border-color: var(--green-dim); color: var(--green); }
-.hbtn.primary:hover { background: var(--green-dim); border-color: var(--green); }
-.hbtn.danger:hover { border-color: var(--red); color: var(--red); }
-.hbtn .bi { font-size: 12px; }
-
-/* Auto-save indicator */
-.autosave-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--text-dim);
-  transition: background 0.4s;
-  flex-shrink: 0;
-}
-.autosave-dot.saved   { background: var(--green); }
-.autosave-dot.saving  { background: var(--coal); }
-
-/* Hidden file input */
-#fileImportInput { display: none; }
-
-/* ── Toast notification ── */
-.toast {
-  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(12px);
-  background: var(--surface3); border: 1px solid var(--border2);
-  color: var(--text); font-family: var(--font-m); font-size: 11px;
-  padding: 9px 18px; border-radius: 6px; letter-spacing: 1px;
-  opacity: 0; pointer-events: none;
-  transition: opacity 0.2s, transform 0.2s;
-  z-index: 9999; white-space: nowrap;
-}
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-.toast.ok   { border-color: var(--green); color: var(--green); }
-.toast.err  { border-color: var(--red);   color: var(--red); }
-
-/* ══════════════════════════════════════
-   LAYOUT
-══════════════════════════════════════ */
-main {
-  position: relative; z-index: 1;
-  padding: 24px 20px 0;
-}
-
-/* ── Flow row ── */
-.flow-row {
-  display: flex;
-  gap: 0;
-  align-items: flex-start;
-  width: 100%;
-  min-height: 400px;
-}
-
-/* ── Column ── */
-.flow-col {
-  flex: 1;
-  min-width: 0;
-  padding: 0 6px;
-}
-
-/* ── Arrow connector ── */
-.flow-connector {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding-top: 52px;
-  width: 60px;
-  flex-shrink: 0;
-  gap: 4px;
-}
-
-.connector-label {
-  font-size: 8px; letter-spacing: 2px; text-transform: uppercase;
-  text-align: center;
-}
-.connector-arrow {
-  display: flex; align-items: center; gap: 0;
-  width: 50px;
-}
-.connector-line {
-  flex: 1; height: 2px;
-  position: relative; overflow: visible;
-}
-.connector-line::after {
-  content: '';
-  position: absolute; inset: 0;
-  border-top: 2px dashed currentColor;
-  animation: dash-flow 0.8s linear infinite;
-  background: none;
-}
-@keyframes dash-flow {
-  to { background-position: -20px 0; }
-}
-.connector-head {
-  width: 0; height: 0;
-  border-top: 5px solid transparent;
-  border-bottom: 5px solid transparent;
-  border-left: 8px solid currentColor;
-  flex-shrink: 0;
-}
-
-.conn-coal   { color: var(--coal); }
-.conn-energy { color: var(--energy); }
-.conn-cactus { color: var(--green); }
-
-/* ── Column header ── */
-.col-header {
-  display: flex; align-items: center; gap: 8px;
-  padding: 6px 10px 10px;
-  margin-bottom: 10px;
-  border-bottom: 2px solid var(--border2);
-}
-.col-header-icon { font-size: 18px; }
-.col-header h2 {
-  font-family: var(--font-d);
-  font-size: 16px; letter-spacing: 3px; text-transform: uppercase;
-}
-.ch-coal   { border-color: var(--coal);   } .ch-coal h2   { color: var(--coal);   }
-.ch-energy { border-color: var(--energy); } .ch-energy h2 { color: var(--energy); }
-.ch-cactus { border-color: var(--green);  } .ch-cactus h2 { color: var(--green);  }
-.ch-output { border-color: var(--border2); } .ch-output h2 { color: var(--text-muted); }
-
-/* ══════════════════════════════════════
-   CARDS
-══════════════════════════════════════ */
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  margin-bottom: 10px;
-  overflow: hidden;
-  transition: border-color var(--transition), box-shadow var(--transition);
-}
-.card:hover { border-color: var(--border2); }
-
-.card.c-coal   { border-left: 3px solid var(--coal);   }
-.card.c-energy { border-left: 3px solid var(--energy); }
-.card.c-cactus { border-left: 3px solid var(--green);  }
-.card.c-output { border-left: 3px solid var(--green); background: var(--surface2); }
-
-.card.bottleneck { box-shadow: 0 0 0 1px var(--red) inset; border-color: var(--red); }
-.card.partial    { box-shadow: 0 0 0 1px var(--coal) inset; }
-
-/* Card header */
-.card-top {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 9px 12px;
-  border-bottom: 1px solid var(--border);
-  cursor: default;
-}
-.card-name {
-  display: flex; align-items: center; gap: 7px;
-  font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
-}
-.card-icon { font-size: 15px; }
-
-.card-btns {
-  display: flex; gap: 5px;
-}
-.cbtn {
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-  width: 20px; height: 20px;
-  border-radius: 4px;
-  cursor: pointer; font-size: 11px;
-  display: flex; align-items: center; justify-content: center;
-  transition: all var(--transition);
-  font-family: var(--font-m);
-}
-.cbtn:hover { border-color: var(--border2); color: var(--text); background: var(--surface2); }
-.cbtn.rm:hover { border-color: var(--red); color: var(--red); }
-
-/* Card body */
-.card-body { padding: 11px 12px; }
-
-/* Fields */
-.frow { display: flex; gap: 7px; margin-bottom: 7px; flex-wrap: wrap; }
-.field { flex: 1; min-width: 60px; display: flex; flex-direction: column; gap: 3px; }
-
-.field label {
-  font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted);
-}
-.field input[type=number] {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  color: var(--text);
-  font-family: var(--font-m);
-  font-size: 11px; font-weight: 600;
-  padding: 5px 7px; width: 100%;
-  transition: border-color var(--transition);
-  -moz-appearance: textfield;
-}
-.field input[type=number]::-webkit-inner-spin-button,
-.field input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
-.field input[type=number]:focus { outline: none; border-color: var(--green); }
-
-/* Rate mini display */
-.rate-mini {
-  display: flex; flex-direction: column; gap: 2px;
-  background: var(--bg);
-  border-radius: 4px;
-  padding: 5px 7px;
-  margin-bottom: 7px;
-  font-size: 9px;
-}
-.rate-row { display: flex; justify-content: space-between; align-items: center; }
-.rate-label { color: var(--text-muted); }
-.rate-val { font-weight: 700; }
-.rv-ok   { color: var(--green); }
-.rv-warn { color: var(--coal); }
-.rv-bad  { color: var(--red); }
-
-/* Status badge */
-.status-row {
-  display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 6px;
-}
-.badge {
-  display: inline-flex; align-items: center; gap: 3px;
-  font-size: 8px; padding: 2px 6px; border-radius: 3px;
-  letter-spacing: 1px; font-weight: 600;
-}
-.b-ok   { background: var(--green-dim);  color: var(--green); }
-.b-warn { background: var(--coal-dim);   color: var(--coal); }
-.b-bad  { background: var(--red-dim);    color: var(--red); }
-.b-info { background: var(--energy-dim); color: var(--energy); }
-
-/* ── Booster section ── */
-.bst-toggle {
-  display: flex; align-items: center; gap: 6px;
-  padding: 5px 0 0;
-  border-top: 1px solid var(--border);
-  margin-top: 6px;
-  cursor: pointer; user-select: none;
-  font-size: 8px; letter-spacing: 2px; text-transform: uppercase;
-  color: var(--text-muted);
-  transition: color var(--transition);
-}
-.bst-toggle:hover { color: var(--text); }
-.bst-toggle.active { color: var(--green); }
-.bst-toggle .bst-badge {
-  margin-left: 4px;
-  background: var(--green-dim); color: var(--green);
-  font-size: 8px; padding: 1px 5px; border-radius: 3px;
-  letter-spacing: 1px;
-}
-.bst-toggle .bst-chevron { margin-left: auto; transition: transform var(--transition); }
-.bst-toggle.open .bst-chevron { transform: rotate(180deg); }
-
-.bst-body { display: none; padding-top: 8px; }
-.bst-body.open { display: block; }
-
-.bst-wood-info {
-  font-size: 8px; color: var(--coal); letter-spacing: 1px;
-  padding: 4px 6px; background: var(--coal-dim); border-radius: 3px;
-  margin-top: 4px;
-}
-
-/* ── Add buttons ── */
-.add-btn {
-  display: flex; align-items: center; justify-content: center; gap: 6px;
-  width: 100%;
-  background: none;
-  border: 1px dashed var(--border);
-  color: var(--text-muted);
-  font-family: var(--font-m); font-size: 9px; font-weight: 700;
-  letter-spacing: 2px; text-transform: uppercase;
-  padding: 8px; border-radius: var(--radius);
-  cursor: pointer; margin-bottom: 8px;
-  transition: all var(--transition);
-}
-.add-btn:hover { border-color: var(--border2); color: var(--text); background: var(--surface2); }
-
-/* ══════════════════════════════════════
-   OUTPUT CARD
-══════════════════════════════════════ */
-.output-big-val {
-  font-family: var(--font-d);
-  font-size: 46px; letter-spacing: 2px; line-height: 1;
-  color: var(--green); text-align: center; padding: 14px 0 4px;
-}
-.output-unit {
-  text-align: center; font-size: 9px; letter-spacing: 3px;
-  text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px;
-}
-.output-stats {
-  border-top: 1px solid var(--border); padding: 10px 12px;
-  display: flex; flex-direction: column; gap: 4px;
-}
-.ostat-row { display: flex; justify-content: space-between; align-items: center; font-size: 10px; }
-.ostat-label { color: var(--text-muted); }
-.ostat-val { font-weight: 700; }
-
-.efficiency-bar {
-  margin-top: 8px;
-  height: 3px; border-radius: 2px; background: var(--border);
-  overflow: hidden;
-}
-.efficiency-fill {
-  height: 100%; border-radius: 2px;
-  background: var(--green);
-  transition: width 0.4s ease;
-}
-
-/* ══════════════════════════════════════
-   RESULTS SECTION
-══════════════════════════════════════ */
-.results-section {
-  position: relative; z-index: 1;
-  margin: 20px 20px 0;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-}
-
-.results-header {
-  padding: 12px 20px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 10px;
-}
-.results-header h2 {
-  font-family: var(--font-d);
-  font-size: 18px; letter-spacing: 3px; color: var(--green);
-}
-
-.results-body { padding: 16px 20px; }
-
-.time-input-wrap {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap;
-}
-.time-input-wrap label {
-  font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted);
-  white-space: nowrap;
-}
-.time-input-wrap input {
-  flex: 1; min-width: 220px;
-  background: var(--bg);
-  border: 1px solid var(--border); border-radius: 4px;
-  color: var(--text); font-family: var(--font-m); font-size: 12px;
-  padding: 7px 12px;
-  transition: border-color var(--transition);
-}
-.time-input-wrap input:focus { outline: none; border-color: var(--green); }
-.time-hint {
-  font-size: 8px; color: var(--text-muted); letter-spacing: 1px;
-}
-
-.time-cards { display: flex; gap: 10px; flex-wrap: wrap; }
-
-.tcard {
-  flex: 1; min-width: 120px;
-  background: var(--bg);
-  border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 14px; text-align: center;
-  transition: border-color var(--transition);
-}
-.tcard:hover { border-color: var(--border2); }
-.tcard-period { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
-.tcard-val {
-  font-family: var(--font-d); font-size: 30px; letter-spacing: 1px; line-height: 1;
-  color: var(--green);
-}
-.tcard-sub { font-size: 8px; color: var(--text-muted); margin-top: 3px; letter-spacing: 1px; }
-
-/* ══════════════════════════════════════
-   BOTTLENECK PANEL
-══════════════════════════════════════ */
-.alerts-panel {
-  position: relative; z-index: 1;
-  margin: 14px 20px 0;
-  display: flex; gap: 8px; flex-wrap: wrap;
-}
-.alert-box {
-  display: flex; align-items: center; gap: 8px;
-  padding: 8px 12px; border-radius: var(--radius);
-  font-size: 9px; letter-spacing: 1px; font-weight: 600;
-  border: 1px solid;
-}
-.alert-box.warn { background: var(--coal-dim); border-color: var(--coal); color: var(--coal); }
-.alert-box.danger { background: var(--red-dim); border-color: var(--red); color: var(--red); }
-.alert-box.info { background: var(--energy-dim); border-color: var(--energy); color: var(--energy); }
-
-/* ══════════════════════════════════════
-   FOOTER
-══════════════════════════════════════ */
-footer {
-  position: relative; z-index: 1;
-  text-align: center; padding: 24px 20px;
-  font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
-  color: var(--text-dim);
-}
-
-/* ══════════════════════════════════════
-   SCROLLBAR
-══════════════════════════════════════ */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-
-/* ══════════════════════════════════════
-   ANIMATIONS
-══════════════════════════════════════ */
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.card { animation: fade-in 0.25s ease; }
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+footer{position:relative;z-index:1;text-align:center;padding:20px;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);}
 </style>
 </head>
 <body>
 
-<!-- ══════════════ HEADER ══════════════ -->
 <header>
   <div class="logo">
     <div class="logo-emoji">🌵</div>
-    <div class="logo-text">
-      <h1>Kaktus-Tycoon Rechner</h1>
-      <p>Cytooxien · Fabrik Optimizer</p>
-    </div>
+    <div class="logo-text"><h1>Kaktus-Tycoon Rechner</h1><p>Cytooxien · Fabrik Optimizer</p></div>
+  </div>
+  <div class="header-mid">
+    <div class="json-badge loading" id="jsonBadge"><div class="json-dot"></div><span id="jsonBadgeText">Lade Stufen-Daten…</span></div>
   </div>
   <div class="header-right">
-
-    <!-- Save / Load controls -->
     <div class="save-controls">
-      <div class="autosave-dot" id="autosaveDot" title="Auto-Speichern Status"></div>
-      <button class="hbtn primary" onclick="exportJSON()" title="Als JSON-Datei herunterladen">
-        <span class="bi">💾</span> Exportieren
-      </button>
-      <button class="hbtn" onclick="document.getElementById('fileImportInput').click()" title="JSON-Datei laden">
-        <span class="bi">📂</span> Importieren
-      </button>
-      <div class="divider"></div>
-      <button class="hbtn danger" onclick="confirmReset()" title="Alle Eingaben zurücksetzen">
-        <span class="bi">↺</span> Reset
-      </button>
+      <div class="autosave-dot" id="autosaveDot"></div>
+      <button class="hbtn primary" onclick="exportJSON()">💾 Export</button>
+      <button class="hbtn" onclick="document.getElementById('fileImportInput').click()">📂 Import</button>
+      <div class="save-divider"></div>
+      <button class="hbtn danger" onclick="confirmReset()">↺ Reset</button>
     </div>
-
     <div class="live-block">
       <div class="live-rate" id="hdrRate">0.00</div>
       <div class="live-label">Kakteen / Sekunde</div>
     </div>
   </div>
 </header>
-
-<!-- Hidden file input for import -->
 <input type="file" id="fileImportInput" accept=".json,application/json" onchange="importJSON(this)">
 
-<!-- Toast -->
-<div class="toast" id="toast"></div>
-
-<!-- ══════════════ ALERTS ══════════════ -->
 <div class="alerts-panel" id="alertsPanel"></div>
 
-<!-- ══════════════ MAIN FLOW ══════════════ -->
 <main>
   <div class="flow-row">
 
-    <!-- ─── COAL COLUMN ─── -->
+    <!-- COLUMN 1: RESSOURCEN (Kohle + Uran) -->
     <div class="flow-col">
-      <div class="col-header ch-coal">
-        <span class="col-header-icon">⛏️</span>
-        <h2>Kohle</h2>
-      </div>
+      <div class="col-header ch-coal"><span class="col-header-icon">⛏️</span><h2>Kohle</h2></div>
       <div id="bohrerContainer"></div>
       <button class="add-btn" onclick="addBohrer()">＋ Kohlebohrer</button>
+      <div class="resource-divider"></div>
+      <div class="col-header ch-uran"><span class="col-header-icon">☢️</span><h2>Uran</h2></div>
+      <div id="uranBohrerContainer"></div>
+      <button class="add-btn" onclick="addUranBohrer()">＋ Uranbohrer</button>
     </div>
 
-    <!-- Arrow: Coal → Energy -->
-    <div class="flow-connector conn-coal">
-      <div class="connector-label">Kohle</div>
-      <div class="connector-arrow">
-        <div class="connector-line"></div>
-        <div class="connector-head"></div>
-      </div>
+    <!-- CONNECTOR: Kohle + Uran → Energie -->
+    <div class="flow-connector" style="padding-top:40px;">
+      <div class="connector-label conn-coal">Kohle</div>
+      <div class="connector-arrow conn-coal"><div class="connector-line"></div><div class="connector-head"></div></div>
+      <div style="height:10px;"></div>
+      <div class="connector-label conn-uran">Uran</div>
+      <div class="connector-arrow conn-uran"><div class="connector-line"></div><div class="connector-head"></div></div>
     </div>
 
-    <!-- ─── ENERGY COLUMN ─── -->
+    <!-- COLUMN 2: ENERGIE -->
     <div class="flow-col">
-      <div class="col-header ch-energy">
-        <span class="col-header-icon">⚡</span>
-        <h2>Energie</h2>
-      </div>
+      <div class="col-header ch-energy"><span class="col-header-icon">⚡</span><h2>Energie</h2></div>
       <div id="kraftwerkContainer"></div>
       <button class="add-btn" onclick="addKraftwerk()">＋ Kohlekraftwerk</button>
+      <div id="atomkwContainer"></div>
+      <button class="add-btn" onclick="addAtomkw()">＋ Atomkraftwerk</button>
       <div id="holzofenContainer"></div>
       <button class="add-btn" onclick="addHolzofen()">＋ Holzofen</button>
     </div>
 
-    <!-- Arrow: Energy → Cactus -->
+    <!-- CONNECTOR: Energie → Kaktus -->
     <div class="flow-connector conn-energy">
       <div class="connector-label">Energie</div>
-      <div class="connector-arrow">
-        <div class="connector-line"></div>
-        <div class="connector-head"></div>
-      </div>
+      <div class="connector-arrow"><div class="connector-line"></div><div class="connector-head"></div></div>
     </div>
 
-    <!-- ─── CACTUS SOURCES COLUMN ─── -->
+    <!-- COLUMN 3: KAKTUS -->
     <div class="flow-col">
-      <div class="col-header ch-cactus">
-        <span class="col-header-icon">🌵</span>
-        <h2>Kaktus</h2>
-      </div>
+      <div class="col-header ch-cactus"><span class="col-header-icon">🌵</span><h2>Kaktus</h2></div>
       <div id="sammlerContainer"></div>
       <div id="fabrikContainer"></div>
       <button class="add-btn" onclick="addFabrik()">＋ Kaktus-Fabrik</button>
     </div>
 
-    <!-- Arrow: Cactus → Output -->
+    <!-- CONNECTOR: Output -->
     <div class="flow-connector conn-cactus">
       <div class="connector-label">Output</div>
-      <div class="connector-arrow">
-        <div class="connector-line"></div>
-        <div class="connector-head"></div>
-      </div>
+      <div class="connector-arrow"><div class="connector-line"></div><div class="connector-head"></div></div>
     </div>
 
-    <!-- ─── OUTPUT COLUMN ─── -->
-    <div class="flow-col" style="max-width:200px; flex-shrink:0;">
-      <div class="col-header ch-output">
-        <span class="col-header-icon">📊</span>
-        <h2>Output</h2>
-      </div>
+    <!-- COLUMN 4: OUTPUT -->
+    <div class="flow-col" style="max-width:200px;flex-shrink:0;">
+      <div class="col-header ch-output"><span class="col-header-icon">📊</span><h2>Output</h2></div>
       <div class="card c-output">
         <div class="output-big-val" id="outBig">0.00</div>
         <div class="output-unit">Kakteen / Sek</div>
         <div class="output-stats">
-          <div class="ostat-row">
-            <span class="ostat-label">⛏️ Kohle/s</span>
-            <span class="ostat-val rv-warn" id="oCoal">0.00</span>
+          <div class="ostat-row"><span class="ostat-label">⛏️ Kohle/s</span><span class="ostat-val rv-warn" id="oCoal">0.00</span></div>
+          <div class="ostat-row"><span class="ostat-label">☢️ Uran/s</span><span class="ostat-val rv-uran" id="oUran">0.00</span></div>
+          <div class="ostat-row"><span class="ostat-label">⚡ Energie/s</span><span class="ostat-val rv-ok" id="oEnergy">0.00</span></div>
+          <div class="ostat-row" style="border-top:1px solid var(--border);margin-top:3px;padding-top:3px;">
+            <span class="ostat-label">🌿 Sammler</span><span class="ostat-val rv-ok" id="oSammler">0.00</span>
           </div>
-          <div class="ostat-row">
-            <span class="ostat-label">⚡ Energie/s</span>
-            <span class="ostat-val rv-ok" id="oEnergy">0.00</span>
-          </div>
-          <div class="ostat-row" style="border-top:1px solid var(--border); margin-top:4px; padding-top:4px;">
-            <span class="ostat-label">🌿 Sammler</span>
-            <span class="ostat-val rv-ok" id="oSammler">0.00</span>
-          </div>
-          <div class="ostat-row">
-            <span class="ostat-label">🏭 Fabriken</span>
-            <span class="ostat-val rv-ok" id="oFabriken">0.00</span>
-          </div>
-          <div class="ostat-row" style="border-top:1px solid var(--border); margin-top:4px; padding-top:4px; font-size:12px;">
+          <div class="ostat-row"><span class="ostat-label">🏭 Fabriken</span><span class="ostat-val rv-ok" id="oFabriken">0.00</span></div>
+          <div class="ostat-row" style="border-top:1px solid var(--border);margin-top:3px;padding-top:3px;">
             <span class="ostat-label" style="color:var(--text);">∑ Gesamt/s</span>
-            <span class="ostat-val" id="oTotal" style="color:var(--green); font-size:13px;">0.00</span>
+            <span class="ostat-val" id="oTotal" style="color:var(--green);font-size:12px;">0.00</span>
           </div>
-          <div class="efficiency-bar">
-            <div class="efficiency-fill" id="effBar" style="width:0%"></div>
-          </div>
-          <div style="font-size:8px; color:var(--text-muted); text-align:right; letter-spacing:1px; margin-top:2px;">
+          <div class="efficiency-bar"><div class="efficiency-fill" id="effBar" style="width:0%"></div></div>
+          <div style="font-size:7px;color:var(--text-muted);text-align:right;letter-spacing:1px;margin-top:2px;">
             Fabrik-Effizienz: <span id="effPct" style="color:var(--green)">—</span>
           </div>
         </div>
       </div>
     </div>
 
-  </div><!-- end flow-row -->
+  </div>
 </main>
 
-<!-- ══════════════ RESULTS ══════════════ -->
 <div class="results-section">
-  <div class="results-header">
-    <span style="font-size:18px;">⏱</span>
-    <h2>Produktion über Zeitraum</h2>
-  </div>
+  <div class="results-header"><span style="font-size:16px">⏱</span><h2>Produktion über Zeitraum</h2></div>
   <div class="results-body">
     <div class="time-input-wrap">
       <label>Zeiträume:</label>
-      <input type="text" id="timeInput" value="15min, 1h, 4h, 12h, 24h"
-        placeholder="z.B. 15min, 1.5h, 12h, 30s" oninput="refreshResults()">
-      <span class="time-hint">Einheiten: s · min · h (Komma-getrennt)</span>
+      <input type="text" id="timeInput" value="15min, 1h, 4h, 12h, 24h" oninput="refreshResults()">
+      <span class="time-hint">Einheiten: s · min · h</span>
     </div>
     <div class="time-cards" id="timeCards"></div>
   </div>
 </div>
 
-<footer>Kaktus-Tycoon Fabrik Rechner · Cytooxien Minecraft Server · Alle Berechnungen lokal im Browser</footer>
+<footer>Kaktus-Tycoon Fabrik Rechner · Cytooxien · Alle Berechnungen lokal im Browser</footer>
 
-<!-- ══════════════ SCRIPT ══════════════ -->
+<div id="devTrigger" onclick="openPwOverlay()" title="Entwickler-Modus">v4.0</div>
+
+<div id="pwOverlay">
+  <div class="pw-box">
+    <div class="pw-title">DEV MODE</div>
+    <div class="pw-sub">PIN eingeben</div>
+    <div class="pw-dots" id="pwDots">
+      <div class="pw-dot" id="pd0"></div><div class="pw-dot" id="pd1"></div>
+      <div class="pw-dot" id="pd2"></div><div class="pw-dot" id="pd3"></div>
+    </div>
+    <div class="pw-pad">
+      <button class="pw-key" onclick="pwKey('1')">1</button>
+      <button class="pw-key" onclick="pwKey('2')">2</button>
+      <button class="pw-key" onclick="pwKey('3')">3</button>
+      <button class="pw-key" onclick="pwKey('4')">4</button>
+      <button class="pw-key" onclick="pwKey('5')">5</button>
+      <button class="pw-key" onclick="pwKey('6')">6</button>
+      <button class="pw-key" onclick="pwKey('7')">7</button>
+      <button class="pw-key" onclick="pwKey('8')">8</button>
+      <button class="pw-key" onclick="pwKey('9')">9</button>
+      <button class="pw-key del" onclick="pwDel()">⌫</button>
+      <button class="pw-key" onclick="pwKey('0')">0</button>
+      <button class="pw-key enter" onclick="pwEnter()">✓</button>
+    </div>
+    <div class="pw-error" id="pwError"></div>
+    <button class="pw-close-btn" onclick="closePwOverlay()">Abbrechen</button>
+  </div>
+</div>
+
+<div id="devModal">
+  <div class="dev-panel">
+    <div class="dev-header">
+      <span style="font-size:18px">⚙</span>
+      <div class="dev-title">Dev Mode — Stufen-Editor</div>
+      <div class="dev-mode-badge">AKTIV</div>
+      <div class="dev-header-right">
+        <button class="dev-btn gold" onclick="devDownloadJSON()">⬇ kaktus-levels.json</button>
+        <button class="dev-btn" onclick="devClearOverrides()">× Überschreibungen löschen</button>
+        <button class="dev-btn danger" onclick="closeDevModal()">✕ Schließen</button>
+      </div>
+    </div>
+    <div class="dev-body">
+      <div class="dev-sidebar" id="devSidebar"></div>
+      <div class="dev-main">
+        <div class="dev-tab-desc" id="devTabDesc">Maschine auswählen →</div>
+        <div class="dev-table-wrap">
+          <table class="dev-table">
+            <thead id="devThead"></thead>
+            <tbody id="devTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="dev-footer">
+      <div class="dev-info">Änderungen werden als lokale Überschreibung gespeichert. Mit "kaktus-levels.json herunterladen" auf GitHub hochladen, damit alle die gleichen Werte haben.</div>
+      <button class="dev-btn gold" onclick="devApplyAndClose()">✓ Übernehmen &amp; Schließen</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
-// ═══════════════════════════════════════════
-//  STATE
-// ═══════════════════════════════════════════
-let _id = 1;
-const uid = () => _id++;
-
-// Singleton Sammler
-const sammler = {
-  id: 'sammler',
-  rate: 0,
-  booster: { mult: 1, hours: 0 }
+// ══════════════════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════════════════
+const CONFIG = {
+  jsonUrl: './kaktus-levels.json',
+  maxLevel: 30,
+  devPassword: '1234',
 };
 
-let bohrerList     = [];
-let kraftwerkList  = [];
-let holzofenList   = [];
-let fabrikList     = [];
+// ══════════════════════════════════════════════════════════
+//  EMBEDDED DEFAULT LEVEL DATA  (fallback)
+// ══════════════════════════════════════════════════════════
+const DEFAULT_LEVEL_DATA = {version:4,machines:{
+  bohrer:{label:"Kohlebohrer",fields:{coalProd:"Kohle",interval:"Intervall (s)"},levels:[
+    {level:1,coalProd:26,interval:10.8},{level:2,coalProd:32,interval:10.8},{level:3,coalProd:40,interval:10.8},
+    {level:4,coalProd:50,interval:10.8},{level:5,coalProd:63,interval:10.8},{level:6,coalProd:79,interval:10.8},
+    {level:7,coalProd:99,interval:10.8},{level:8,coalProd:124,interval:10.8},{level:9,coalProd:155,interval:10.8},
+    {level:10,coalProd:190,interval:10.8},{level:11,coalProd:240,interval:10.8},{level:12,coalProd:300,interval:10.8},
+    {level:13,coalProd:375,interval:10.8},{level:14,coalProd:469,interval:10.8},{level:15,coalProd:586,interval:10.8},
+    {level:16,coalProd:733,interval:10.8},{level:17,coalProd:916,interval:10.8},{level:18,coalProd:1145,interval:10.8},
+    {level:19,coalProd:1431,interval:10.8},{level:20,coalProd:1789,interval:10.8},{level:21,coalProd:2236,interval:10.8},
+    {level:22,coalProd:2795,interval:10.8},{level:23,coalProd:3494,interval:10.8},{level:24,coalProd:4368,interval:10.8},
+    {level:25,coalProd:5460,interval:10.8},{level:26,coalProd:6825,interval:10.8},{level:27,coalProd:8531,interval:10.8},
+    {level:28,coalProd:10664,interval:10.8},{level:29,coalProd:13330,interval:10.8},{level:30,coalProd:16662,interval:10.8}
+  ]},
+  kraftwerk:{label:"Kohlekraftwerk",fields:{eProd:"Energie",coalCons:"Kohle",interval:"Intervall (s)"},levels:[
+    {level:1,eProd:75,coalCons:98,interval:7.2},{level:2,eProd:91,coalCons:119,interval:7.2},
+    {level:3,eProd:111,coalCons:144,interval:7.2},{level:4,eProd:136,coalCons:174,interval:7.2},
+    {level:5,eProd:166,coalCons:210,interval:7.2},{level:6,eProd:202,coalCons:254,interval:7.2},
+    {level:7,eProd:247,coalCons:307,interval:7.2},{level:8,eProd:301,coalCons:372,interval:7.2},
+    {level:9,eProd:367,coalCons:450,interval:7.2},{level:10,eProd:448,coalCons:544,interval:7.2},
+    {level:11,eProd:547,coalCons:658,interval:7.2},{level:12,eProd:595,coalCons:694,interval:7.2},
+    {level:13,eProd:650,coalCons:730,interval:7.2},{level:14,eProd:793,coalCons:883,interval:7.2},
+    {level:15,eProd:968,coalCons:1068,interval:7.2},{level:16,eProd:1181,coalCons:1293,interval:7.2},
+    {level:17,eProd:1440,coalCons:1564,interval:7.2},{level:18,eProd:1757,coalCons:1893,interval:7.2},
+    {level:19,eProd:2143,coalCons:2290,interval:7.2},{level:20,eProd:2615,coalCons:2771,interval:7.2},
+    {level:21,eProd:3190,coalCons:3353,interval:7.2},{level:22,eProd:3892,coalCons:4057,interval:7.2},
+    {level:23,eProd:4748,coalCons:4909,interval:7.2},{level:24,eProd:5792,coalCons:5939,interval:7.2},
+    {level:25,eProd:7066,coalCons:7186,interval:7.2},{level:26,eProd:8620,coalCons:8695,interval:7.2},
+    {level:27,eProd:10517,coalCons:10521,interval:7.2},{level:28,eProd:12830,coalCons:12731,interval:7.2},
+    {level:29,eProd:15652,coalCons:15404,interval:7.2},{level:30,eProd:19095,coalCons:18639,interval:7.2}
+  ]},
+  holzofen:{label:"Holzofen",fields:{eProd:"Energie",woodCons:"Holz",interval:"Intervall (s)"},levels:[
+    {level:1,eProd:30,woodCons:24,interval:14.4},{level:2,eProd:37,woodCons:28,interval:14.4},
+    {level:3,eProd:45,woodCons:33,interval:14.4},{level:4,eProd:55,woodCons:39,interval:14.4},
+    {level:5,eProd:67,woodCons:46,interval:14.4},{level:6,eProd:82,woodCons:55,interval:14.4},
+    {level:7,eProd:100,woodCons:64,interval:14.4},{level:8,eProd:122,woodCons:76,interval:14.4},
+    {level:9,eProd:149,woodCons:90,interval:14.4},{level:10,eProd:182,woodCons:106,interval:14.4},
+    {level:11,eProd:222,woodCons:125,interval:14.4},{level:12,eProd:241,woodCons:135,interval:14.4},
+    {level:13,eProd:260,woodCons:146,interval:14.4},{level:14,eProd:317,woodCons:172,interval:14.4},
+    {level:15,eProd:387,woodCons:203,interval:14.4},{level:16,eProd:472,woodCons:240,interval:14.4},
+    {level:17,eProd:576,woodCons:283,interval:14.4},{level:18,eProd:702,woodCons:334,interval:14.4},
+    {level:19,eProd:856,woodCons:394,interval:14.4},{level:20,eProd:1045,woodCons:465,interval:14.4},
+    {level:21,eProd:1275,woodCons:549,interval:14.4},{level:22,eProd:1556,woodCons:648,interval:14.4},
+    {level:23,eProd:1898,woodCons:765,interval:14.4},{level:24,eProd:2315,woodCons:903,interval:14.4},
+    {level:25,eProd:2824,woodCons:1066,interval:14.4},{level:26,eProd:3446,woodCons:1258,interval:14.4},
+    {level:27,eProd:4204,woodCons:1484,interval:14.4},{level:28,eProd:5129,woodCons:1751,interval:14.4},
+    {level:29,eProd:6257,woodCons:2066,interval:14.4},{level:30,eProd:7634,woodCons:2438,interval:14.4}
+  ]},
+  fabrik:{label:"Kaktus-Fabrik",fields:{cProd:"Kakteen",eCons:"Energie",interval:"Intervall (s)"},levels:[
+    {level:1,cProd:240,eCons:19,interval:3.6},{level:2,cProd:293,eCons:23,interval:3.6},
+    {level:3,cProd:357,eCons:28,interval:3.6},{level:4,cProd:435,eCons:33,interval:3.6},
+    {level:5,cProd:531,eCons:40,interval:3.6},{level:6,cProd:648,eCons:48,interval:3.6},
+    {level:7,cProd:790,eCons:58,interval:3.6},{level:8,cProd:964,eCons:69,interval:3.6},
+    {level:9,cProd:1176,eCons:83,interval:3.6},{level:10,cProd:1434,eCons:100,interval:3.6},
+    {level:11,cProd:1750,eCons:120,interval:3.6},{level:12,cProd:1951,eCons:144,interval:3.6},
+    {level:13,cProd:2152,eCons:170,interval:3.6},{level:14,cProd:2625,eCons:204,interval:3.6},
+    {level:15,cProd:3203,eCons:245,interval:3.6},{level:16,cProd:3908,eCons:294,interval:3.6},
+    {level:17,cProd:4767,eCons:353,interval:3.6},{level:18,cProd:5816,eCons:424,interval:3.6},
+    {level:19,cProd:7096,eCons:508,interval:3.6},{level:20,cProd:8657,eCons:610,interval:3.6},
+    {level:21,cProd:10562,eCons:732,interval:3.6},{level:22,cProd:12886,eCons:878,interval:3.6},
+    {level:23,cProd:15721,eCons:1054,interval:3.6},{level:24,cProd:19179,eCons:1265,interval:3.6},
+    {level:25,cProd:23398,eCons:1518,interval:3.6},{level:26,cProd:28545,eCons:1821,interval:3.6},
+    {level:27,cProd:34825,eCons:2186,interval:3.6},{level:28,cProd:42487,eCons:2623,interval:3.6},
+    {level:29,cProd:51834,eCons:3148,interval:3.6},{level:30,cProd:63237,eCons:3777,interval:3.6}
+  ]},
+  uranBohrer:{label:"Uranbohrer",fields:{uranProd:"Uran",interval:"Intervall (s)"},levels:[
+    {level:1,uranProd:10,interval:12.0},{level:2,uranProd:13,interval:12.0},{level:3,uranProd:16,interval:12.0},
+    {level:4,uranProd:20,interval:12.0},{level:5,uranProd:25,interval:12.0},{level:6,uranProd:31,interval:12.0},
+    {level:7,uranProd:39,interval:12.0},{level:8,uranProd:49,interval:12.0},{level:9,uranProd:61,interval:12.0},
+    {level:10,uranProd:76,interval:12.0},{level:11,uranProd:95,interval:12.0},{level:12,uranProd:119,interval:12.0},
+    {level:13,uranProd:149,interval:12.0},{level:14,uranProd:186,interval:12.0},{level:15,uranProd:233,interval:12.0},
+    {level:16,uranProd:291,interval:12.0},{level:17,uranProd:364,interval:12.0},{level:18,uranProd:455,interval:12.0},
+    {level:19,uranProd:569,interval:12.0},{level:20,uranProd:711,interval:12.0},{level:21,uranProd:889,interval:12.0},
+    {level:22,uranProd:1111,interval:12.0},{level:23,uranProd:1389,interval:12.0},{level:24,uranProd:1736,interval:12.0},
+    {level:25,uranProd:2170,interval:12.0},{level:26,uranProd:2713,interval:12.0},{level:27,uranProd:3391,interval:12.0},
+    {level:28,uranProd:4239,interval:12.0},{level:29,uranProd:5299,interval:12.0},{level:30,uranProd:6624,interval:12.0}
+  ]},
+  atomkw:{label:"Atomkraftwerk",fields:{eProd:"Energie",uranCons:"Uran",interval:"Intervall (s)"},levels:[
+    {level:1,eProd:250,uranCons:18,interval:9.0},{level:2,eProd:305,uranCons:22,interval:9.0},
+    {level:3,eProd:372,uranCons:26,interval:9.0},{level:4,eProd:454,uranCons:31,interval:9.0},
+    {level:5,eProd:554,uranCons:37,interval:9.0},{level:6,eProd:676,uranCons:45,interval:9.0},
+    {level:7,eProd:824,uranCons:54,interval:9.0},{level:8,eProd:1005,uranCons:65,interval:9.0},
+    {level:9,eProd:1226,uranCons:78,interval:9.0},{level:10,eProd:1496,uranCons:93,interval:9.0},
+    {level:11,eProd:1825,uranCons:112,interval:9.0},{level:12,eProd:2227,uranCons:134,interval:9.0},
+    {level:13,eProd:2717,uranCons:161,interval:9.0},{level:14,eProd:3315,uranCons:193,interval:9.0},
+    {level:15,eProd:4044,uranCons:232,interval:9.0},{level:16,eProd:4934,uranCons:278,interval:9.0},
+    {level:17,eProd:6019,uranCons:334,interval:9.0},{level:18,eProd:7343,uranCons:401,interval:9.0},
+    {level:19,eProd:8959,uranCons:481,interval:9.0},{level:20,eProd:10930,uranCons:577,interval:9.0},
+    {level:21,eProd:13334,uranCons:692,interval:9.0},{level:22,eProd:16267,uranCons:831,interval:9.0},
+    {level:23,eProd:19846,uranCons:997,interval:9.0},{level:24,eProd:24212,uranCons:1196,interval:9.0},
+    {level:25,eProd:29538,uranCons:1435,interval:9.0},{level:26,eProd:36036,uranCons:1722,interval:9.0},
+    {level:27,eProd:43964,uranCons:2067,interval:9.0},{level:28,eProd:53636,uranCons:2480,interval:9.0},
+    {level:29,eProd:65436,uranCons:2976,interval:9.0},{level:30,eProd:79832,uranCons:3571,interval:9.0}
+  ]}
+}};
 
-// ═══════════════════════════════════════════
-//  DEFAULTS
-// ═══════════════════════════════════════════
-const mkBohrer    = () => ({ id: uid(), coalProd: 190,  interval: 10.8, booster: { mult: 1, hours: 0 } });
-const mkKraftwerk = () => ({ id: uid(), eProd: 650,     coalCons: 730,  interval: 7.2,  booster: { mult: 1, hours: 0 } });
-const mkHolzofen  = () => ({ id: uid(), eProd: 260,     woodCons: 146,  interval: 14.4, initialWood: 1000, booster: { mult: 1, hours: 0 } });
-const mkFabrik    = () => ({ id: uid(), cProd: 5292,    eCons: 140,     interval: 3.6,  booster: { mult: 1, hours: 0 } });
+// ══════════════════════════════════════════════════════════
+//  LEVEL DATA  (runtime)
+// ══════════════════════════════════════════════════════════
+let levelData = null;
+const OVERRIDE_KEY = 'kaktus-level-overrides-v4';
+const STATE_KEY    = 'kaktus-tycoon-v4';
 
-// ═══════════════════════════════════════════
-//  ADD / REMOVE
-// ═══════════════════════════════════════════
-function addBohrer()    { bohrerList.push(mkBohrer());       renderAll(); }
-function addKraftwerk() { kraftwerkList.push(mkKraftwerk());  renderAll(); }
-function addHolzofen()  { holzofenList.push(mkHolzofen());   renderAll(); }
-function addFabrik()    { fabrikList.push(mkFabrik());       renderAll(); }
+function getLocalOverrides(){try{return JSON.parse(localStorage.getItem(OVERRIDE_KEY)||'null');}catch{return null;}}
+function saveLocalOverrides(d){try{localStorage.setItem(OVERRIDE_KEY,JSON.stringify(d));}catch{}}
 
-function removeCard(type, id) {
-  const map = { bohrer: bohrerList, kraftwerk: kraftwerkList, holzofen: holzofenList, fabrik: fabrikList };
-  const arr = map[type];
-  if (!arr) return;
-  const i = arr.findIndex(x => x.id === id);
-  if (i !== -1) arr.splice(i, 1);
+function mergeOverrides(base,ov){
+  if(!ov) return;
+  for(const[mk,lvs] of Object.entries(ov)){
+    const m=base.machines[mk]; if(!m) continue;
+    for(const[lvStr,vals] of Object.entries(lvs)){
+      const e=m.levels.find(l=>l.level===parseInt(lvStr));
+      if(e) Object.assign(e,vals);
+    }
+  }
+}
+
+function getLevelValues(type,level){
+  return levelData?.machines?.[type]?.levels.find(l=>l.level===level)||null;
+}
+
+async function fetchLevelData(){
+  const badge=document.getElementById('jsonBadge'),txt=document.getElementById('jsonBadgeText');
+  try{
+    const r=await fetch(CONFIG.jsonUrl,{cache:'no-cache'});
+    if(!r.ok) throw new Error();
+    levelData=await r.json();
+    badge.className='json-badge ok'; txt.textContent='Stufen-JSON geladen ✓';
+  }catch{
+    levelData=JSON.parse(JSON.stringify(DEFAULT_LEVEL_DATA));
+    badge.className='json-badge warn'; txt.textContent='Standard-Stufen (lokal)';
+  }
+  mergeOverrides(levelData,getLocalOverrides());
+}
+
+// ══════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════
+let _id=1; const uid=()=>_id++;
+
+const sammler={id:'sammler',rate:0,booster:{mult:1,hours:0}};
+let bohrerList=[],kraftwerkList=[],holzofenList=[],fabrikList=[];
+let uranBohrerList=[],atomkwList=[];
+
+const mkBohrer    =()=>({id:uid(),level:10,booster:{mult:1,hours:0}});
+const mkKraftwerk =()=>({id:uid(),level:13,booster:{mult:1,hours:0}});
+const mkHolzofen  =()=>({id:uid(),level:13,initialWood:5000,booster:{mult:1,hours:0}});
+const mkFabrik    =()=>({id:uid(),level:13,booster:{mult:1,hours:0}});
+const mkUranBohrer=()=>({id:uid(),level:10,booster:{mult:1,hours:0}});
+const mkAtomkw    =()=>({id:uid(),level:13,booster:{mult:1,hours:0}});
+
+function addBohrer()    {bohrerList.push(mkBohrer());    renderAll();}
+function addKraftwerk() {kraftwerkList.push(mkKraftwerk());renderAll();}
+function addHolzofen()  {holzofenList.push(mkHolzofen()); renderAll();}
+function addFabrik()    {fabrikList.push(mkFabrik());    renderAll();}
+function addUranBohrer(){uranBohrerList.push(mkUranBohrer());renderAll();}
+function addAtomkw()    {atomkwList.push(mkAtomkw());    renderAll();}
+
+function removeCard(type,id){
+  const map={bohrer:bohrerList,kraftwerk:kraftwerkList,holzofen:holzofenList,fabrik:fabrikList,uranBohrer:uranBohrerList,atomkw:atomkwList};
+  const arr=map[type];if(!arr)return;
+  const i=arr.findIndex(x=>x.id===id);if(i!==-1)arr.splice(i,1);
   renderAll();
 }
 
-// ═══════════════════════════════════════════
-//  CALCULATION ENGINE
-// ═══════════════════════════════════════════
-function boost(b, tSec) {
-  const dur = b.hours * 3600;
-  return (dur > 0 && tSec < dur) ? b.mult : 1;
+// ══════════════════════════════════════════════════════════
+//  CALCULATION
+// ══════════════════════════════════════════════════════════
+function boost(b,t){const d=b.hours*3600;return(d>0&&t<d)?b.mult:1;}
+
+function calcAtTime(tSec){
+  // Coal production
+  let coalRate=0;
+  for(const b of bohrerList){
+    const v=getLevelValues('bohrer',b.level);
+    if(v&&v.interval>0) coalRate+=(v.coalProd/v.interval)*boost(b.booster,tSec);
+  }
+  // Uran production
+  let uranRate=0;
+  for(const ub of uranBohrerList){
+    const v=getLevelValues('uranBohrer',ub.level);
+    if(v&&v.interval>0) uranRate+=(v.uranProd/v.interval)*boost(ub.booster,tSec);
+  }
+
+  // Energy — coal plants
+  let availCoal=coalRate,energyRate=0;
+  const kwDetails=[];
+  for(const kw of kraftwerkList){
+    const v=getLevelValues('kraftwerk',kw.level);
+    if(!v||v.interval<=0) continue;
+    const cn=v.coalCons/v.interval,ep=v.eProd/v.interval,bst=boost(kw.booster,tSec);
+    const factor=cn>0?Math.min(1,availCoal/cn):1;
+    availCoal=Math.max(0,availCoal-cn*factor);
+    energyRate+=ep*factor*bst;
+    kwDetails.push({id:kw.id,factor});
+  }
+  // Energy — atomic plants
+  let availUran=uranRate;
+  const akwDetails=[];
+  for(const akw of atomkwList){
+    const v=getLevelValues('atomkw',akw.level);
+    if(!v||v.interval<=0) continue;
+    const un=v.uranCons/v.interval,ep=v.eProd/v.interval,bst=boost(akw.booster,tSec);
+    const factor=un>0?Math.min(1,availUran/un):1;
+    availUran=Math.max(0,availUran-un*factor);
+    energyRate+=ep*factor*bst;
+    akwDetails.push({id:akw.id,factor});
+  }
+  // Energy — wood ovens
+  const ofenDetails=[];
+  for(const o of holzofenList){
+    const v=getLevelValues('holzofen',o.level);
+    if(!v||v.interval<=0) continue;
+    const burnR=v.woodCons/v.interval;
+    const woodDur=burnR>0&&o.initialWood>0?o.initialWood/burnR:0;
+    const active=woodDur>0&&tSec<woodDur;
+    if(active) energyRate+=(v.eProd/v.interval)*boost(o.booster,tSec);
+    ofenDetails.push({id:o.id,active,remaining:Math.max(0,woodDur-tSec)});
+  }
+
+  // Cactus
+  const sammlerRate=sammler.rate*boost(sammler.booster,tSec);
+  let availEnergy=energyRate,fabrikRate=0;
+  const fabDetails=[];
+  for(const f of fabrikList){
+    const v=getLevelValues('fabrik',f.level);
+    if(!v||v.interval<=0) continue;
+    const en=v.eCons/v.interval,cp=v.cProd/v.interval,bst=boost(f.booster,tSec);
+    const factor=en>0?Math.min(1,availEnergy/en):1;
+    availEnergy=Math.max(0,availEnergy-en*factor);
+    fabrikRate+=cp*factor*bst;
+    fabDetails.push({id:f.id,factor});
+  }
+  return{cactusRate:sammlerRate+fabrikRate,sammlerRate,fabrikRate,coalRate,uranRate,energyRate,kwDetails,akwDetails,ofenDetails,fabDetails};
 }
 
-function calcAtTime(tSec) {
-  // ── 1. Coal production ──────────────────
-  let coalRate = 0;
-  for (const b of bohrerList) {
-    if (b.interval <= 0) continue;
-    coalRate += (b.coalProd / b.interval) * boost(b.booster, tSec);
-  }
-
-  // ── 2. Energy production ─────────────────
-  let availCoal = coalRate;
-  let energyRate = 0;
-  const kwDetails = [];
-
-  for (const kw of kraftwerkList) {
-    if (kw.interval <= 0) continue;
-    const coalNeeded  = kw.coalCons / kw.interval;
-    const ePossible   = kw.eProd   / kw.interval;
-    const bst         = boost(kw.booster, tSec);
-    let factor = 1;
-    if (coalNeeded > 0) {
-      factor = Math.min(1, availCoal / coalNeeded);
-      availCoal = Math.max(0, availCoal - coalNeeded * factor);
-    }
-    const eActual = ePossible * factor * bst;
-    energyRate += eActual;
-    kwDetails.push({ id: kw.id, factor });
-  }
-
-  const ofenDetails = [];
-  for (const o of holzofenList) {
-    if (o.interval <= 0 || o.woodCons <= 0 || o.initialWood <= 0) continue;
-    const burnRate  = o.woodCons / o.interval;
-    const woodDur   = o.initialWood / burnRate;
-    const active    = tSec < woodDur;
-    const eActual   = active ? (o.eProd / o.interval) * boost(o.booster, tSec) : 0;
-    energyRate += eActual;
-    ofenDetails.push({ id: o.id, active, remaining: Math.max(0, woodDur - tSec) });
-  }
-
-  // ── 3. Cactus production ─────────────────
-  const sammlerRate = sammler.rate * boost(sammler.booster, tSec);
-  let availEnergy   = energyRate;
-  let fabrikRate    = 0;
-  const fabDetails  = [];
-
-  for (const f of fabrikList) {
-    if (f.interval <= 0) continue;
-    const eNeeded   = f.eCons / f.interval;
-    const cPossible = f.cProd / f.interval;
-    const bst       = boost(f.booster, tSec);
-    let factor = 1;
-    if (eNeeded > 0) {
-      factor = Math.min(1, availEnergy / eNeeded);
-      availEnergy = Math.max(0, availEnergy - eNeeded * factor);
-    }
-    const cActual = cPossible * factor * bst;
-    fabrikRate += cActual;
-    fabDetails.push({ id: f.id, factor });
-  }
-
-  return {
-    cactusRate:  sammlerRate + fabrikRate,
-    sammlerRate, fabrikRate,
-    coalRate,    energyRate,
-    kwDetails, ofenDetails, fabDetails
-  };
-}
-
-function getBreakpoints(T) {
-  const bps = new Set([0, T]);
-  const all = [sammler, ...bohrerList, ...kraftwerkList, ...holzofenList, ...fabrikList];
-  for (const el of all) {
-    const bp = el.booster.hours * 3600;
-    if (bp > 0 && bp < T) bps.add(bp);
-  }
-  for (const o of holzofenList) {
-    if (o.woodCons > 0 && o.interval > 0 && o.initialWood > 0) {
-      const wd = o.initialWood / (o.woodCons / o.interval);
-      if (wd > 0 && wd < T) bps.add(wd);
+function getBreakpoints(T){
+  const bps=new Set([0,T]);
+  const all=[sammler,...bohrerList,...kraftwerkList,...holzofenList,...fabrikList,...uranBohrerList,...atomkwList];
+  for(const el of all){const bp=el.booster?.hours*3600;if(bp>0&&bp<T)bps.add(bp);}
+  for(const o of holzofenList){
+    const v=getLevelValues('holzofen',o.level);
+    if(v&&v.interval>0&&v.woodCons>0&&o.initialWood>0){
+      const wd=o.initialWood/(v.woodCons/v.interval);
+      if(wd>0&&wd<T)bps.add(wd);
     }
   }
-  return [...bps].sort((a, b) => a - b);
+  return[...bps].sort((a,b)=>a-b);
 }
 
-function calcTotal(T_sec) {
-  const bps = getBreakpoints(T_sec);
-  let total = 0;
-  for (let i = 0; i < bps.length - 1; i++) {
-    const mid = (bps[i] + bps[i+1]) / 2;
-    total += calcAtTime(mid).cactusRate * (bps[i+1] - bps[i]);
-  }
-  return total;
+function calcTotal(T){
+  const bps=getBreakpoints(T);let tot=0;
+  for(let i=0;i<bps.length-1;i++){const mid=(bps[i]+bps[i+1])/2;tot+=calcAtTime(mid).cactusRate*(bps[i+1]-bps[i]);}
+  return tot;
 }
 
-function parseTime(str) {
-  str = str.trim().toLowerCase();
-  const m = str.match(/^([\d.,]+)\s*(h|std|min|s)$/);
-  if (!m) return null;
-  const v = parseFloat(m[1].replace(',', '.'));
-  if (m[2] === 'h' || m[2] === 'std') return v * 3600;
-  if (m[2] === 'min') return v * 60;
-  return v;
+function parseTime(s){
+  s=s.trim().toLowerCase();
+  const m=s.match(/^([\d.,]+)\s*(h|std|min|s)$/);if(!m)return null;
+  const v=parseFloat(m[1].replace(',','.'));
+  if(m[2]==='h'||m[2]==='std')return v*3600;if(m[2]==='min')return v*60;return v;
 }
-
-function fmtBig(n) {
-  if (!isFinite(n)) return '∞';
-  if (n >= 1e12) return (n/1e12).toFixed(2) + ' B';
-  if (n >= 1e9)  return (n/1e9).toFixed(2)  + ' Mrd';
-  if (n >= 1e6)  return (n/1e6).toFixed(2)  + ' Mio';
-  if (n >= 1e3)  return (n/1e3).toFixed(1)  + ' K';
+function fmtBig(n){
+  if(!isFinite(n))return'∞';
+  if(n>=1e12)return(n/1e12).toFixed(2)+' B';if(n>=1e9)return(n/1e9).toFixed(2)+' Mrd';
+  if(n>=1e6)return(n/1e6).toFixed(2)+' Mio';if(n>=1e3)return(n/1e3).toFixed(1)+' K';
   return n.toFixed(0);
 }
-
-function fmtDur(sec) {
-  if (!isFinite(sec) || sec <= 0) return '—';
-  const h = Math.floor(sec / 3600);
-  const m = Math.floor((sec % 3600) / 60);
-  const s = Math.floor(sec % 60);
-  if (h > 0) return `${h}h ${m}min`;
-  if (m > 0) return `${m}min ${s}s`;
-  return `${s}s`;
+function fmtDur(s){
+  if(!isFinite(s)||s<=0)return'—';
+  const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=Math.floor(s%60);
+  if(h>0)return`${h}h ${m}min`;if(m>0)return`${m}min ${sec}s`;return`${sec}s`;
 }
 
-// ═══════════════════════════════════════════
-//  DISPLAY UPDATE (no full re-render)
-// ═══════════════════════════════════════════
-function updateDisplay() {
-  const r = calcAtTime(0);
+// ══════════════════════════════════════════════════════════
+//  DISPLAY UPDATE
+// ══════════════════════════════════════════════════════════
+function updateDisplay(){
+  if(!levelData)return;
+  const r=calcAtTime(0);
+  const hdr=document.getElementById('hdrRate');
+  hdr.textContent=r.cactusRate.toFixed(2);hdr.className='live-rate'+(r.cactusRate>0?'':' warn');
+  document.getElementById('outBig').textContent=r.cactusRate.toFixed(2);
+  document.getElementById('oCoal').textContent=r.coalRate.toFixed(2);
+  document.getElementById('oUran').textContent=r.uranRate.toFixed(2);
+  document.getElementById('oEnergy').textContent=r.energyRate.toFixed(2);
+  document.getElementById('oSammler').textContent=r.sammlerRate.toFixed(2);
+  document.getElementById('oFabriken').textContent=r.fabrikRate.toFixed(2);
+  document.getElementById('oTotal').textContent=r.cactusRate.toFixed(2);
 
-  // Header
-  const hdr = document.getElementById('hdrRate');
-  hdr.textContent = r.cactusRate.toFixed(2);
-  hdr.className   = 'live-rate' + (r.cactusRate > 0 ? '' : ' warn');
+  const sbr=document.getElementById('sammler-boosted');
+  if(sbr)sbr.textContent=r.sammlerRate.toFixed(2);
 
-  // Output card
-  document.getElementById('outBig').textContent     = r.cactusRate.toFixed(2);
-  document.getElementById('oCoal').textContent      = r.coalRate.toFixed(2);
-  document.getElementById('oEnergy').textContent    = r.energyRate.toFixed(2);
-  document.getElementById('oSammler').textContent   = r.sammlerRate.toFixed(2);
-  document.getElementById('oFabriken').textContent  = r.fabrikRate.toFixed(2);
-  document.getElementById('oTotal').textContent     = r.cactusRate.toFixed(2);
-
-  // Efficiency bar (fab rate vs theoretical max)
-  const fabMax = fabrikList.reduce((s, f) => s + (f.cProd / (f.interval||1)), 0);
-  const eff = fabMax > 0 ? Math.min(100, (r.fabrikRate / fabMax) * 100) : 0;
-  document.getElementById('effBar').style.width = eff.toFixed(1) + '%';
-  document.getElementById('effBar').style.background =
-    eff > 80 ? 'var(--green)' : eff > 40 ? 'var(--coal)' : 'var(--red)';
-  document.getElementById('effPct').textContent =
-    fabMax > 0 ? eff.toFixed(0) + '%' : '—';
-  document.getElementById('effPct').style.color =
-    eff > 80 ? 'var(--green)' : eff > 40 ? 'var(--coal)' : 'var(--red)';
+  // Efficiency
+  const fabMax=fabrikList.reduce((s,f)=>{const v=getLevelValues('fabrik',f.level);return s+(v&&v.interval>0?v.cProd/v.interval:0);},0);
+  const eff=fabMax>0?Math.min(100,(r.fabrikRate/fabMax)*100):0;
+  const bar=document.getElementById('effBar');
+  bar.style.width=eff.toFixed(1)+'%';bar.style.background=eff>80?'var(--green)':eff>40?'var(--coal)':'var(--red)';
+  const ep=document.getElementById('effPct');
+  ep.textContent=fabMax>0?eff.toFixed(0)+'%':'—';ep.style.color=eff>80?'var(--green)':eff>40?'var(--coal)':'var(--red)';
 
   // Alerts
-  const alerts = [];
-  for (const f of r.fabDetails) {
-    if (f.factor < 0.99 && f.factor > 0) {
-      alerts.push({ type: 'warn', msg: `Kaktus-Fabrik läuft auf ${(f.factor*100).toFixed(0)}% Auslastung (Energiemangel)` });
-    } else if (f.factor === 0) {
-      alerts.push({ type: 'danger', msg: 'Kaktus-Fabrik produziert NICHTS — kein Strom verfügbar' });
-    }
-  }
-  for (const kw of r.kwDetails) {
-    if (kw.factor < 0.99 && kw.factor > 0) {
-      alerts.push({ type: 'warn', msg: `Kohlekraftwerk läuft auf ${(kw.factor*100).toFixed(0)}% — Kohlemangel` });
-    } else if (kw.factor === 0) {
-      alerts.push({ type: 'danger', msg: 'Kohlekraftwerk produziert keinen Strom — kein Kohle-Nachschub' });
-    }
-  }
-  for (const o of r.ofenDetails) {
-    if (!o.active) {
-      alerts.push({ type: 'info', msg: 'Holzofen: Holz aufgebraucht — keine Energieproduktion mehr' });
-    } else if (o.remaining < 3600) {
-      alerts.push({ type: 'warn', msg: `Holzofen: Holz reicht noch ca. ${fmtDur(o.remaining)}` });
-    }
-  }
+  const alerts=[];
+  for(const f of r.fabDetails){if(f.factor===0)alerts.push({t:'danger',m:'Kaktus-Fabrik produziert NICHTS — kein Strom'});else if(f.factor<0.99)alerts.push({t:'warn',m:`Kaktus-Fabrik auf ${(f.factor*100).toFixed(0)}% — Energiemangel`});}
+  for(const kw of r.kwDetails){if(kw.factor===0)alerts.push({t:'danger',m:'Kohlekraftwerk: kein Strom — kein Kohle-Nachschub'});else if(kw.factor<0.99)alerts.push({t:'warn',m:`Kohlekraftwerk auf ${(kw.factor*100).toFixed(0)}% — Kohlemangel`});}
+  for(const akw of r.akwDetails){if(akw.factor===0)alerts.push({t:'uran',m:'Atomkraftwerk: kein Strom — kein Uran-Nachschub'});else if(akw.factor<0.99)alerts.push({t:'uran',m:`Atomkraftwerk auf ${(akw.factor*100).toFixed(0)}% — Uranmangel`});}
+  for(const o of r.ofenDetails){if(!o.active)alerts.push({t:'info',m:'Holzofen: Holz aufgebraucht'});else if(o.remaining<3600)alerts.push({t:'warn',m:`Holzofen: Holz reicht noch ca. ${fmtDur(o.remaining)}`});}
+  document.getElementById('alertsPanel').innerHTML=alerts.map(a=>`<div class="alert-box ${a.t}">⚠ ${a.m}</div>`).join('');
 
-  const panel = document.getElementById('alertsPanel');
-  panel.innerHTML = alerts.map(a => `
-    <div class="alert-box ${a.type}">⚠ ${a.msg}</div>
-  `).join('');
-
-  // Rate minis (update without full re-render)
-  updateRateMinis(r);
+  // Rate minis — coal drills
+  for(const b of bohrerList){const v=getLevelValues('bohrer',b.level);const el=document.querySelector(`[data-rate="br-${b.id}"]`);if(el)el.textContent=(v&&v.interval>0?v.coalProd/v.interval:0).toFixed(2);}
+  // Rate minis — uran drills
+  for(const ub of uranBohrerList){const v=getLevelValues('uranBohrer',ub.level);const el=document.querySelector(`[data-rate="ub-${ub.id}"]`);if(el)el.textContent=(v&&v.interval>0?v.uranProd/v.interval:0).toFixed(2);}
+  // Rate minis — coal plants
+  for(const kw of kraftwerkList){
+    const v=getLevelValues('kraftwerk',kw.level),fd=r.kwDetails.find(x=>x.id===kw.id);
+    const e1=document.querySelector(`[data-rate="kw-e-${kw.id}"]`),e2=document.querySelector(`[data-rate="kw-c-${kw.id}"]`);
+    if(e1)e1.textContent=(v&&v.interval>0?(v.eProd/v.interval)*(fd?.factor??1):0).toFixed(2);
+    if(e2)e2.textContent=(v&&v.interval>0?v.coalCons/v.interval:0).toFixed(2);
+    const card=document.querySelector(`.card[data-id="${kw.id}"]`);
+    if(card){card.classList.toggle('partial',fd?.factor<0.99&&fd?.factor>0);card.classList.toggle('bottleneck',fd?.factor===0);}
+  }
+  // Rate minis — atomic plants
+  for(const akw of atomkwList){
+    const v=getLevelValues('atomkw',akw.level),fd=r.akwDetails.find(x=>x.id===akw.id);
+    const e1=document.querySelector(`[data-rate="akw-e-${akw.id}"]`),e2=document.querySelector(`[data-rate="akw-u-${akw.id}"]`);
+    if(e1)e1.textContent=(v&&v.interval>0?(v.eProd/v.interval)*(fd?.factor??1):0).toFixed(2);
+    if(e2)e2.textContent=(v&&v.interval>0?v.uranCons/v.interval:0).toFixed(2);
+    const card=document.querySelector(`.card[data-id="${akw.id}"]`);
+    if(card){card.classList.toggle('partial',fd?.factor<0.99&&fd?.factor>0);card.classList.toggle('bottleneck',fd?.factor===0);}
+  }
+  // Rate minis — wood ovens
+  for(const o of holzofenList){
+    const v=getLevelValues('holzofen',o.level),od=r.ofenDetails.find(x=>x.id===o.id);
+    const e1=document.querySelector(`[data-rate="of-e-${o.id}"]`),e2=document.querySelector(`[data-rate="of-w-${o.id}"]`);
+    if(e1)e1.textContent=(v&&v.interval>0?v.eProd/v.interval:0).toFixed(2);
+    if(e2){e2.textContent=od?fmtDur(od.remaining):'—';e2.className='rate-val '+(od?.active===false?'rv-bad':od?.remaining<3600?'rv-warn':'rv-ok');}
+  }
+  // Rate minis — factories
+  for(const f of fabrikList){
+    const v=getLevelValues('fabrik',f.level),fd=r.fabDetails.find(x=>x.id===f.id);
+    const e1=document.querySelector(`[data-rate="fb-c-${f.id}"]`),e2=document.querySelector(`[data-rate="fb-e-${f.id}"]`);
+    if(e1)e1.textContent=(v&&v.interval>0?(v.cProd/v.interval)*(fd?.factor??1):0).toFixed(2);
+    if(e2)e2.textContent=(v&&v.interval>0?v.eCons/v.interval:0).toFixed(2);
+    const card=document.querySelector(`.card[data-id="${f.id}"]`);
+    if(card){card.classList.toggle('partial',fd?.factor<0.99&&fd?.factor>0);card.classList.toggle('bottleneck',fd?.factor===0);}
+  }
   refreshResults();
 }
 
-function updateRateMinis(r) {
-  // Update per-card rate displays
-  for (const b of bohrerList) {
-    const el = document.querySelector(`[data-rate-id="bohrer-${b.id}"]`);
-    if (el) el.textContent = (b.interval > 0 ? b.coalProd / b.interval : 0).toFixed(2);
-  }
-  for (const kw of kraftwerkList) {
-    const el  = document.querySelector(`[data-rate-id="kw-e-${kw.id}"]`);
-    const el2 = document.querySelector(`[data-rate-id="kw-c-${kw.id}"]`);
-    const fd  = r.kwDetails.find(x => x.id === kw.id);
-    if (el)  el.textContent  = (kw.interval > 0 ? (kw.eProd / kw.interval) * (fd?.factor ?? 1) : 0).toFixed(2);
-    if (el2) el2.textContent = (kw.interval > 0 ? kw.coalCons / kw.interval : 0).toFixed(2);
-    const card = document.querySelector(`.card[data-id="${kw.id}"]`);
-    if (card) {
-      card.classList.toggle('partial',    fd?.factor < 0.99 && fd?.factor > 0);
-      card.classList.toggle('bottleneck', fd?.factor === 0);
-    }
-  }
-  for (const o of holzofenList) {
-    const el  = document.querySelector(`[data-rate-id="ofen-e-${o.id}"]`);
-    const el2 = document.querySelector(`[data-rate-id="ofen-w-${o.id}"]`);
-    const od  = r.ofenDetails.find(x => x.id === o.id);
-    if (el)  el.textContent  = (o.interval > 0 ? o.eProd / o.interval : 0).toFixed(2);
-    if (el2) el2.textContent = od ? fmtDur(od.remaining) : '—';
-    if (el2) el2.className   = 'rate-val ' + (od?.active === false ? 'rv-bad' : od?.remaining < 3600 ? 'rv-warn' : 'rv-warn');
-  }
-  for (const f of fabrikList) {
-    const el  = document.querySelector(`[data-rate-id="fab-c-${f.id}"]`);
-    const el2 = document.querySelector(`[data-rate-id="fab-e-${f.id}"]`);
-    const fd  = r.fabDetails.find(x => x.id === f.id);
-    if (el)  el.textContent  = (f.interval > 0 ? (f.cProd / f.interval) * (fd?.factor ?? 1) : 0).toFixed(2);
-    if (el2) el2.textContent = (f.interval > 0 ? f.eCons / f.interval : 0).toFixed(2);
-    const card = document.querySelector(`.card[data-id="${f.id}"]`);
-    if (card) {
-      card.classList.toggle('partial',    fd?.factor < 0.99 && fd?.factor > 0);
-      card.classList.toggle('bottleneck', fd?.factor === 0);
-    }
-  }
-}
-
-function refreshResults() {
-  const raw    = document.getElementById('timeInput').value;
-  const parts  = raw.split(',').map(s => s.trim()).filter(Boolean);
-  const grid   = document.getElementById('timeCards');
-  grid.innerHTML = '';
-  for (const p of parts) {
-    const sec = parseTime(p);
-    if (sec === null) continue;
-    const total = calcTotal(sec);
-    const card = document.createElement('div');
-    card.className = 'tcard';
-    card.innerHTML = `
-      <div class="tcard-period">${p}</div>
-      <div class="tcard-val">${fmtBig(total)}</div>
-      <div class="tcard-sub">Kakteen</div>
-    `;
+function refreshResults(){
+  const raw=document.getElementById('timeInput')?.value||'';
+  const grid=document.getElementById('timeCards');if(!grid)return;grid.innerHTML='';
+  for(const p of raw.split(',').map(s=>s.trim()).filter(Boolean)){
+    const sec=parseTime(p);if(sec===null)continue;
+    const total=calcTotal(sec);
+    const card=document.createElement('div');card.className='tcard';
+    card.innerHTML=`<div class="tcard-period">${p}</div><div class="tcard-val">${fmtBig(total)}</div><div class="tcard-sub">Kakteen</div>`;
     grid.appendChild(card);
   }
 }
 
-// ═══════════════════════════════════════════
-//  BOOSTER TOGGLE (DOM-level, no re-render)
-// ═══════════════════════════════════════════
-document.addEventListener('click', e => {
-  const t = e.target.closest('.bst-toggle');
-  if (!t) return;
-  const body = t.nextElementSibling;
-  if (!body || !body.classList.contains('bst-body')) return;
-  const open = body.classList.toggle('open');
-  t.classList.toggle('open', open);
-});
-
-// ═══════════════════════════════════════════
-//  INPUT HANDLING (event delegation)
-// ═══════════════════════════════════════════
-function findObj(type, id) {
-  const idN = typeof id === 'string' ? (id === 'sammler' ? 'sammler' : parseInt(id)) : id;
-  if (type === 'sammler') return sammler;
-  const map = { bohrer: bohrerList, kraftwerk: kraftwerkList, holzofen: holzofenList, fabrik: fabrikList };
-  return map[type]?.find(x => x.id === idN);
-}
-
-function setPath(obj, path, val) {
-  const parts = path.split('.');
-  let cur = obj;
-  for (let i = 0; i < parts.length - 1; i++) cur = cur[parts[i]];
-  cur[parts[parts.length - 1]] = val;
-}
-
-document.addEventListener('change', e => {
-  const inp = e.target;
-  if (!inp.dataset.bind) return;
-  const { type, id, field } = inp.dataset;
-  const obj = findObj(type, id);
-  if (!obj) return;
-  const val = parseFloat(inp.value) || 0;
-  setPath(obj, field, val);
-  updateDisplay();
-  // Update booster badge text without re-render
-  if (field.startsWith('booster')) {
-    const toggle = inp.closest('.bst-body')?.previousElementSibling;
-    if (toggle) {
-      const badge = toggle.querySelector('.bst-badge');
-      const o = findObj(type, id);
-      if (o && o.booster.mult > 1 && o.booster.hours > 0) {
-        if (badge) { badge.textContent = `× ${o.booster.mult}  ${o.booster.hours}h`; }
-        else {
-          const b2 = document.createElement('span');
-          b2.className = 'bst-badge';
-          b2.textContent = `× ${o.booster.mult}  ${o.booster.hours}h`;
-          toggle.insertBefore(b2, toggle.querySelector('.bst-chevron'));
-        }
-        toggle.classList.add('active');
-      } else {
-        if (badge) badge.remove();
-        toggle.classList.remove('active');
-      }
-    }
-  }
-});
-
-// ═══════════════════════════════════════════
-//  RENDERERS
-// ═══════════════════════════════════════════
-function boosterHTML(el, type) {
-  const id   = el.id;
-  const has  = el.booster.mult > 1 && el.booster.hours > 0;
+// ══════════════════════════════════════════════════════════
+//  CAROUSEL
+// ══════════════════════════════════════════════════════════
+function carouselHTML(type,id,currentLevel){
+  let items='';
+  for(let i=1;i<=CONFIG.maxLevel;i++)items+=`<div class="car-item${i===currentLevel?' active':''}" data-lv="${i}">${i}</div>`;
   return `
-    <div class="bst-toggle ${has ? 'active open' : ''}">
-      🚀 Booster
-      ${has ? `<span class="bst-badge">× ${el.booster.mult}  ${el.booster.hours}h</span>` : ''}
+    <div class="level-block" data-carousel="${type}-${id}">
+      <div class="level-head">
+        <span class="level-head-label">Stufe</span>
+        <span class="level-current-badge" id="lcb-${type}-${id}">${currentLevel}</span>
+      </div>
+      <div class="carousel-row">
+        <button class="car-arrow" data-dir="-1" data-ctype="${type}" data-cid="${id}">◀</button>
+        <div class="car-vp"><div class="car-strip" id="cs-${type}-${id}">${items}</div></div>
+        <button class="car-arrow" data-dir="1" data-ctype="${type}" data-cid="${id}">▶</button>
+      </div>
+    </div>`;
+}
+
+function centerStrip(strip){
+  if(!strip)return;
+  const active=strip.querySelector('.car-item.active');if(!active)return;
+  const vp=strip.parentElement;
+  strip.style.transform=`translateX(${vp.offsetWidth/2-active.offsetLeft-active.offsetWidth/2}px)`;
+}
+
+function setLevel(type,id,level){
+  const obj=findObj(type,id);if(!obj)return;
+  obj.level=Math.max(1,Math.min(CONFIG.maxLevel,level));
+  const strip=document.getElementById(`cs-${type}-${id}`);
+  if(strip){strip.querySelectorAll('.car-item').forEach(i=>i.classList.toggle('active',parseInt(i.dataset.lv)===obj.level));centerStrip(strip);}
+  const badge=document.getElementById(`lcb-${type}-${id}`);if(badge)badge.textContent=obj.level;
+  const li=document.getElementById(`li-${type}-${id}`);if(li)li.innerHTML=buildLevelInfoHTML(type,obj.level);
+  updateDisplay();autoSave();
+}
+
+// ══════════════════════════════════════════════════════════
+//  LEVEL INFO
+// ══════════════════════════════════════════════════════════
+function buildLevelInfoHTML(type,level){
+  const v=getLevelValues(type,level);const m=levelData?.machines?.[type];
+  if(!v||!m)return'<div class="li-row"><span class="li-label">Keine Daten</span></div>';
+  const colorMap={coalProd:'lv-coal',eProd:'lv-energy',coalCons:'lv-coal',woodCons:'lv-wood',cProd:'lv-cactus',eCons:'lv-energy',uranProd:'lv-uran',uranCons:'lv-uran'};
+  const prodFields=Object.entries(m.fields).filter(([k])=>k!=='interval');
+  let rows=prodFields.map(([k,label])=>`<div class="li-row"><span class="li-label">${label} / Intervall</span><span class="li-val ${colorMap[k]||''}">${(v[k]||0).toLocaleString('de-DE')}</span></div>`).join('');
+  rows+=`<div class="li-interval-row"><span class="li-label">Intervall</span><span class="li-val lv-interval">${v.interval??'—'}s</span></div>`;
+  return rows;
+}
+
+// ══════════════════════════════════════════════════════════
+//  BOOSTER HTML
+// ══════════════════════════════════════════════════════════
+function boosterHTML(el,type){
+  const id=el.id,has=el.booster.mult>1&&el.booster.hours>0;
+  return `
+    <div class="bst-toggle${has?' active open':''}">
+      🚀 Booster ${has?`<span class="bst-badge">× ${el.booster.mult}  ${el.booster.hours}h</span>`:''}
       <span class="bst-chevron">▾</span>
     </div>
-    <div class="bst-body ${has ? 'open' : ''}">
+    <div class="bst-body${has?' open':''}">
       <div class="frow">
-        <div class="field">
-          <label>Multiplikator (×)</label>
+        <div class="field"><label>Multiplikator (×)</label>
           <input type="number" min="1" step="0.1" value="${el.booster.mult}"
             data-bind="1" data-type="${type}" data-id="${id}" data-field="booster.mult">
         </div>
-        <div class="field">
-          <label>Laufzeit (Stunden)</label>
-          <input type="number" min="0" step="0.25" value="${el.booster.hours}"
+        <div class="field"><label>Laufzeit (Stunden)</label>
+          <input type="number" min="0" step=".25" value="${el.booster.hours}"
             data-bind="1" data-type="${type}" data-id="${id}" data-field="booster.hours">
         </div>
       </div>
-    </div>
-  `;
+    </div>`;
 }
 
-function renderSammler() {
-  const el = sammler;
-  document.getElementById('sammlerContainer').innerHTML = `
+// ══════════════════════════════════════════════════════════
+//  CARD RENDERERS
+// ══════════════════════════════════════════════════════════
+function renderSammler(){
+  const el=sammler;
+  document.getElementById('sammlerContainer').innerHTML=`
     <div class="card c-cactus" data-type="sammler" data-id="sammler">
-      <div class="card-top">
-        <div class="card-name"><span class="card-icon">🌿</span> Kaktus-Sammler</div>
-      </div>
+      <div class="card-top"><div class="card-name"><span class="card-icon">🌿</span> Kaktus-Sammler</div></div>
       <div class="card-body">
         <div class="frow">
           <div class="field">
@@ -1120,353 +916,363 @@ function renderSammler() {
         </div>
         <div class="rate-mini">
           <div class="rate-row">
-            <span class="rate-label">Kaktus/s</span>
-            <span class="rate-val rv-ok" data-rate-id="sammler-rate">${el.rate.toFixed(2)}</span>
+            <span class="rate-label">Kaktus/s (mit Booster)</span>
+            <span class="rate-val rv-ok" id="sammler-boosted">0.00</span>
           </div>
         </div>
-        ${boosterHTML(el, 'sammler')}
+        ${boosterHTML(el,'sammler')}
       </div>
-    </div>
-  `;
+    </div>`;
 }
 
-function renderBohrerCard(b) {
-  const rate = b.interval > 0 ? b.coalProd / b.interval : 0;
-  return `
-    <div class="card c-coal" data-type="bohrer" data-id="${b.id}">
-      <div class="card-top">
-        <div class="card-name"><span class="card-icon">⛏️</span> Kohlebohrer</div>
-        <div class="card-btns">
-          <button class="cbtn rm" onclick="removeCard('bohrer',${b.id})" title="Entfernen">✕</button>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="frow">
-          <div class="field">
-            <label>Kohle produziert</label>
-            <input type="number" min="0" value="${b.coalProd}"
-              data-bind="1" data-type="bohrer" data-id="${b.id}" data-field="coalProd">
-          </div>
-          <div class="field">
-            <label>Intervall (Sek)</label>
-            <input type="number" min="0.1" step="0.1" value="${b.interval}"
-              data-bind="1" data-type="bohrer" data-id="${b.id}" data-field="interval">
-          </div>
-        </div>
-        <div class="rate-mini">
-          <div class="rate-row">
-            <span class="rate-label">Kohle/s</span>
-            <span class="rate-val rv-warn" data-rate-id="bohrer-${b.id}">${rate.toFixed(2)}</span>
-          </div>
-        </div>
-        ${boosterHTML(b, 'bohrer')}
-      </div>
+function renderBohrerCard(b){return`
+  <div class="card c-coal" data-type="bohrer" data-id="${b.id}">
+    <div class="card-top">
+      <div class="card-name"><span class="card-icon">⛏️</span> Kohlebohrer</div>
+      <div class="card-btns"><button class="cbtn rm" onclick="removeCard('bohrer',${b.id})">✕</button></div>
     </div>
-  `;
-}
-
-function renderKraftwerkCard(kw) {
-  const erate = kw.interval > 0 ? kw.eProd / kw.interval : 0;
-  const crate = kw.interval > 0 ? kw.coalCons / kw.interval : 0;
-  return `
-    <div class="card c-energy" data-type="kraftwerk" data-id="${kw.id}">
-      <div class="card-top">
-        <div class="card-name"><span class="card-icon">🏭</span> Kohlekraftwerk</div>
-        <div class="card-btns">
-          <button class="cbtn rm" onclick="removeCard('kraftwerk',${kw.id})" title="Entfernen">✕</button>
-        </div>
+    <div class="card-body">
+      ${carouselHTML('bohrer',b.id,b.level)}
+      <div class="level-info" id="li-bohrer-${b.id}">${buildLevelInfoHTML('bohrer',b.level)}</div>
+      <div class="rate-mini">
+        <div class="rate-row"><span class="rate-label">Kohle/s</span>
+          <span class="rate-val rv-warn" data-rate="br-${b.id}">—</span></div>
       </div>
-      <div class="card-body">
-        <div class="frow">
-          <div class="field">
-            <label>Energie prod.</label>
-            <input type="number" min="0" value="${kw.eProd}"
-              data-bind="1" data-type="kraftwerk" data-id="${kw.id}" data-field="eProd">
-          </div>
-          <div class="field">
-            <label>Kohle verb.</label>
-            <input type="number" min="0" value="${kw.coalCons}"
-              data-bind="1" data-type="kraftwerk" data-id="${kw.id}" data-field="coalCons">
-          </div>
-          <div class="field">
-            <label>Intervall (Sek)</label>
-            <input type="number" min="0.1" step="0.1" value="${kw.interval}"
-              data-bind="1" data-type="kraftwerk" data-id="${kw.id}" data-field="interval">
-          </div>
-        </div>
-        <div class="rate-mini">
-          <div class="rate-row">
-            <span class="rate-label">Energie/s (aktuell)</span>
-            <span class="rate-val rv-ok" data-rate-id="kw-e-${kw.id}">${erate.toFixed(2)}</span>
-          </div>
-          <div class="rate-row">
-            <span class="rate-label">Kohle benötigt/s</span>
-            <span class="rate-val rv-warn" data-rate-id="kw-c-${kw.id}">${crate.toFixed(2)}</span>
-          </div>
-        </div>
-        ${boosterHTML(kw, 'kraftwerk')}
-      </div>
+      ${boosterHTML(b,'bohrer')}
     </div>
-  `;
-}
+  </div>`;}
 
-function renderHolzofenCard(o) {
-  const erate   = o.interval > 0 ? o.eProd / o.interval : 0;
-  const burnR   = o.interval > 0 && o.woodCons > 0 ? o.woodCons / o.interval : 0;
-  const woodDur = burnR > 0 && o.initialWood > 0 ? o.initialWood / burnR : 0;
-  return `
-    <div class="card c-energy" data-type="holzofen" data-id="${o.id}">
-      <div class="card-top">
-        <div class="card-name"><span class="card-icon">🔥</span> Holzofen</div>
-        <div class="card-btns">
-          <button class="cbtn rm" onclick="removeCard('holzofen',${o.id})" title="Entfernen">✕</button>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="frow">
-          <div class="field">
-            <label>Energie prod.</label>
-            <input type="number" min="0" value="${o.eProd}"
-              data-bind="1" data-type="holzofen" data-id="${o.id}" data-field="eProd">
-          </div>
-          <div class="field">
-            <label>Holz verb.</label>
-            <input type="number" min="0" value="${o.woodCons}"
-              data-bind="1" data-type="holzofen" data-id="${o.id}" data-field="woodCons">
-          </div>
-          <div class="field">
-            <label>Intervall (Sek)</label>
-            <input type="number" min="0.1" step="0.1" value="${o.interval}"
-              data-bind="1" data-type="holzofen" data-id="${o.id}" data-field="interval">
-          </div>
-        </div>
-        <div class="frow">
-          <div class="field">
-            <label>🪵 Holz im Lager</label>
-            <input type="number" min="0" value="${o.initialWood}"
-              data-bind="1" data-type="holzofen" data-id="${o.id}" data-field="initialWood">
-          </div>
-        </div>
-        <div class="rate-mini">
-          <div class="rate-row">
-            <span class="rate-label">Energie/s</span>
-            <span class="rate-val rv-ok" data-rate-id="ofen-e-${o.id}">${erate.toFixed(2)}</span>
-          </div>
-          <div class="rate-row">
-            <span class="rate-label">Holz reicht für</span>
-            <span class="rate-val rv-warn" data-rate-id="ofen-w-${o.id}">${fmtDur(woodDur)}</span>
-          </div>
-        </div>
-        ${boosterHTML(o, 'holzofen')}
-      </div>
+function renderUranBohrerCard(ub){return`
+  <div class="card c-uran" data-type="uranBohrer" data-id="${ub.id}">
+    <div class="card-top">
+      <div class="card-name"><span class="card-icon">☢️</span> Uranbohrer</div>
+      <div class="card-btns"><button class="cbtn rm" onclick="removeCard('uranBohrer',${ub.id})">✕</button></div>
     </div>
-  `;
-}
-
-function renderFabrikCard(f) {
-  const crate = f.interval > 0 ? f.cProd / f.interval : 0;
-  const erate = f.interval > 0 ? f.eCons / f.interval : 0;
-  return `
-    <div class="card c-cactus" data-type="fabrik" data-id="${f.id}">
-      <div class="card-top">
-        <div class="card-name"><span class="card-icon">🌵</span> Kaktus-Fabrik</div>
-        <div class="card-btns">
-          <button class="cbtn rm" onclick="removeCard('fabrik',${f.id})" title="Entfernen">✕</button>
-        </div>
+    <div class="card-body">
+      ${carouselHTML('uranBohrer',ub.id,ub.level)}
+      <div class="level-info" id="li-uranBohrer-${ub.id}">${buildLevelInfoHTML('uranBohrer',ub.level)}</div>
+      <div class="rate-mini">
+        <div class="rate-row"><span class="rate-label">Uran/s</span>
+          <span class="rate-val rv-uran" data-rate="ub-${ub.id}">—</span></div>
       </div>
-      <div class="card-body">
-        <div class="frow">
-          <div class="field">
-            <label>Kaktus prod.</label>
-            <input type="number" min="0" value="${f.cProd}"
-              data-bind="1" data-type="fabrik" data-id="${f.id}" data-field="cProd">
-          </div>
-          <div class="field">
-            <label>Energie verb.</label>
-            <input type="number" min="0" value="${f.eCons}"
-              data-bind="1" data-type="fabrik" data-id="${f.id}" data-field="eCons">
-          </div>
-          <div class="field">
-            <label>Intervall (Sek)</label>
-            <input type="number" min="0.1" step="0.1" value="${f.interval}"
-              data-bind="1" data-type="fabrik" data-id="${f.id}" data-field="interval">
-          </div>
-        </div>
-        <div class="rate-mini">
-          <div class="rate-row">
-            <span class="rate-label">Kaktus/s (aktuell)</span>
-            <span class="rate-val rv-ok" data-rate-id="fab-c-${f.id}">${crate.toFixed(2)}</span>
-          </div>
-          <div class="rate-row">
-            <span class="rate-label">Energie benötigt/s</span>
-            <span class="rate-val rv-warn" data-rate-id="fab-e-${f.id}">${erate.toFixed(2)}</span>
-          </div>
-        </div>
-        ${boosterHTML(f, 'fabrik')}
-      </div>
+      ${boosterHTML(ub,'uranBohrer')}
     </div>
-  `;
-}
+  </div>`;}
 
-// ═══════════════════════════════════════════
+function renderKraftwerkCard(kw){return`
+  <div class="card c-energy" data-type="kraftwerk" data-id="${kw.id}">
+    <div class="card-top">
+      <div class="card-name"><span class="card-icon">🏭</span> Kohlekraftwerk</div>
+      <div class="card-btns"><button class="cbtn rm" onclick="removeCard('kraftwerk',${kw.id})">✕</button></div>
+    </div>
+    <div class="card-body">
+      ${carouselHTML('kraftwerk',kw.id,kw.level)}
+      <div class="level-info" id="li-kraftwerk-${kw.id}">${buildLevelInfoHTML('kraftwerk',kw.level)}</div>
+      <div class="rate-mini">
+        <div class="rate-row"><span class="rate-label">Energie/s (aktuell)</span>
+          <span class="rate-val rv-ok" data-rate="kw-e-${kw.id}">—</span></div>
+        <div class="rate-row"><span class="rate-label">Kohle benötigt/s</span>
+          <span class="rate-val rv-warn" data-rate="kw-c-${kw.id}">—</span></div>
+      </div>
+      ${boosterHTML(kw,'kraftwerk')}
+    </div>
+  </div>`;}
+
+function renderAtomkwCard(akw){return`
+  <div class="card c-uran" data-type="atomkw" data-id="${akw.id}">
+    <div class="card-top">
+      <div class="card-name"><span class="card-icon">⚛️</span> Atomkraftwerk</div>
+      <div class="card-btns"><button class="cbtn rm" onclick="removeCard('atomkw',${akw.id})">✕</button></div>
+    </div>
+    <div class="card-body">
+      ${carouselHTML('atomkw',akw.id,akw.level)}
+      <div class="level-info" id="li-atomkw-${akw.id}">${buildLevelInfoHTML('atomkw',akw.level)}</div>
+      <div class="rate-mini">
+        <div class="rate-row"><span class="rate-label">Energie/s (aktuell)</span>
+          <span class="rate-val rv-ok" data-rate="akw-e-${akw.id}">—</span></div>
+        <div class="rate-row"><span class="rate-label">Uran benötigt/s</span>
+          <span class="rate-val rv-uran" data-rate="akw-u-${akw.id}">—</span></div>
+      </div>
+      ${boosterHTML(akw,'atomkw')}
+    </div>
+  </div>`;}
+
+function renderHolzofenCard(o){return`
+  <div class="card c-energy" data-type="holzofen" data-id="${o.id}">
+    <div class="card-top">
+      <div class="card-name"><span class="card-icon">🔥</span> Holzofen</div>
+      <div class="card-btns"><button class="cbtn rm" onclick="removeCard('holzofen',${o.id})">✕</button></div>
+    </div>
+    <div class="card-body">
+      ${carouselHTML('holzofen',o.id,o.level)}
+      <div class="level-info" id="li-holzofen-${o.id}">${buildLevelInfoHTML('holzofen',o.level)}</div>
+      <div class="frow">
+        <div class="field"><label>🪵 Holz im Lager</label>
+          <input type="number" min="0" value="${o.initialWood}"
+            data-bind="1" data-type="holzofen" data-id="${o.id}" data-field="initialWood">
+        </div>
+      </div>
+      <div class="rate-mini">
+        <div class="rate-row"><span class="rate-label">Energie/s</span>
+          <span class="rate-val rv-ok" data-rate="of-e-${o.id}">—</span></div>
+        <div class="rate-row"><span class="rate-label">Holz reicht für</span>
+          <span class="rate-val rv-warn" data-rate="of-w-${o.id}">—</span></div>
+      </div>
+      ${boosterHTML(o,'holzofen')}
+    </div>
+  </div>`;}
+
+function renderFabrikCard(f){return`
+  <div class="card c-cactus" data-type="fabrik" data-id="${f.id}">
+    <div class="card-top">
+      <div class="card-name"><span class="card-icon">🌵</span> Kaktus-Fabrik</div>
+      <div class="card-btns"><button class="cbtn rm" onclick="removeCard('fabrik',${f.id})">✕</button></div>
+    </div>
+    <div class="card-body">
+      ${carouselHTML('fabrik',f.id,f.level)}
+      <div class="level-info" id="li-fabrik-${f.id}">${buildLevelInfoHTML('fabrik',f.level)}</div>
+      <div class="rate-mini">
+        <div class="rate-row"><span class="rate-label">Kaktus/s (aktuell)</span>
+          <span class="rate-val rv-ok" data-rate="fb-c-${f.id}">—</span></div>
+        <div class="rate-row"><span class="rate-label">Energie benötigt/s</span>
+          <span class="rate-val rv-warn" data-rate="fb-e-${f.id}">—</span></div>
+      </div>
+      ${boosterHTML(f,'fabrik')}
+    </div>
+  </div>`;}
+
+// ══════════════════════════════════════════════════════════
 //  FULL RENDER
-// ═══════════════════════════════════════════
-function renderAll() {
-  document.getElementById('bohrerContainer').innerHTML    = bohrerList.map(renderBohrerCard).join('');
-  document.getElementById('kraftwerkContainer').innerHTML = kraftwerkList.map(renderKraftwerkCard).join('');
-  document.getElementById('holzofenContainer').innerHTML  = holzofenList.map(renderHolzofenCard).join('');
-  document.getElementById('fabrikContainer').innerHTML    = fabrikList.map(renderFabrikCard).join('');
+// ══════════════════════════════════════════════════════════
+function renderAll(){
+  document.getElementById('bohrerContainer').innerHTML    =bohrerList.map(renderBohrerCard).join('');
+  document.getElementById('uranBohrerContainer').innerHTML=uranBohrerList.map(renderUranBohrerCard).join('');
+  document.getElementById('kraftwerkContainer').innerHTML =kraftwerkList.map(renderKraftwerkCard).join('');
+  document.getElementById('atomkwContainer').innerHTML    =atomkwList.map(renderAtomkwCard).join('');
+  document.getElementById('holzofenContainer').innerHTML  =holzofenList.map(renderHolzofenCard).join('');
+  document.getElementById('fabrikContainer').innerHTML    =fabrikList.map(renderFabrikCard).join('');
   renderSammler();
-  updateDisplay();
+  requestAnimationFrame(()=>{document.querySelectorAll('.car-strip').forEach(s=>centerStrip(s));updateDisplay();});
   autoSave();
 }
 
-// ═══════════════════════════════════════════
-//  SAVE / LOAD
-// ═══════════════════════════════════════════
-const STORAGE_KEY = 'kaktus-tycoon-v1';
-let _saveTimer = null;
-
-function getSnapshot() {
-  return {
-    version: 1,
-    _idCounter: _id,
-    sammler:       JSON.parse(JSON.stringify(sammler)),
-    bohrerList:    JSON.parse(JSON.stringify(bohrerList)),
-    kraftwerkList: JSON.parse(JSON.stringify(kraftwerkList)),
-    holzofenList:  JSON.parse(JSON.stringify(holzofenList)),
-    fabrikList:    JSON.parse(JSON.stringify(fabrikList)),
-    timeInput:     document.getElementById('timeInput')?.value ?? '15min, 1h, 4h, 12h, 24h'
-  };
-}
-
-function applySnapshot(s) {
-  if (!s || s.version !== 1) return false;
-  _id = s._idCounter ?? (_id);
-  Object.assign(sammler, s.sammler);
-  bohrerList     = s.bohrerList    ?? [];
-  kraftwerkList  = s.kraftwerkList ?? [];
-  holzofenList   = s.holzofenList  ?? [];
-  fabrikList     = s.fabrikList    ?? [];
-  const ti = document.getElementById('timeInput');
-  if (ti && s.timeInput) ti.value = s.timeInput;
-  return true;
-}
-
-// ── Auto-save to localStorage ──
-function autoSave() {
-  const dot = document.getElementById('autosaveDot');
-  if (dot) dot.className = 'autosave-dot saving';
-  clearTimeout(_saveTimer);
-  _saveTimer = setTimeout(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(getSnapshot()));
-      if (dot) dot.className = 'autosave-dot saved';
-      setTimeout(() => { if (dot) dot.className = 'autosave-dot'; }, 1800);
-    } catch (e) {
-      if (dot) dot.className = 'autosave-dot';
-    }
-  }, 400);
-}
-
-// Also auto-save when timeInput changes
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('timeInput')?.addEventListener('input', autoSave);
+// ══════════════════════════════════════════════════════════
+//  EVENT DELEGATION
+// ══════════════════════════════════════════════════════════
+document.addEventListener('click',e=>{
+  const item=e.target.closest('.car-item');
+  if(item){const c=item.closest('[data-carousel]');const parts=c.dataset.carousel.split('-');const t=parts.slice(0,-1).join('-');const i=parts[parts.length-1];setLevel(t,isNaN(i)?i:parseInt(i),parseInt(item.dataset.lv));return;}
+  const arrow=e.target.closest('.car-arrow');
+  if(arrow){
+    const t=arrow.dataset.ctype,i=arrow.dataset.cid;
+    const obj=findObj(t,isNaN(i)?i:parseInt(i));
+    if(obj)setLevel(t,isNaN(i)?i:parseInt(i),obj.level+parseInt(arrow.dataset.dir));
+    return;
+  }
+  const bst=e.target.closest('.bst-toggle');
+  if(bst){const body=bst.nextElementSibling;if(body?.classList.contains('bst-body')){const o=body.classList.toggle('open');bst.classList.toggle('open',o);}}
 });
 
-// ── Export JSON file ──
-function exportJSON() {
-  try {
-    const snap = getSnapshot();
-    snap.exportedAt = new Date().toISOString();
-    const blob = new Blob([JSON.stringify(snap, null, 2)], { type: 'application/json' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    const ts   = new Date().toISOString().slice(0,16).replace('T','_').replace(':','-');
-    a.href     = url;
-    a.download = `kaktus-fabrik_${ts}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast('✓ Exportiert', 'ok');
-  } catch (e) {
-    showToast('Export fehlgeschlagen', 'err');
-  }
-}
+document.addEventListener('wheel',e=>{
+  const vp=e.target.closest('.car-vp');if(!vp)return;e.preventDefault();
+  const strip=vp.querySelector('.car-strip');const c=strip.closest('[data-carousel]');
+  const parts=c.dataset.carousel.split('-');const t=parts.slice(0,-1).join('-');const i=parts[parts.length-1];
+  const obj=findObj(t,isNaN(i)?i:parseInt(i));
+  if(obj)setLevel(t,isNaN(i)?i:parseInt(i),obj.level+(e.deltaY>0?1:-1));
+},{passive:false});
 
-// ── Import JSON file ──
-function importJSON(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const snap = JSON.parse(e.target.result);
-      if (applySnapshot(snap)) {
-        renderAll();
-        showToast('✓ Konfiguration geladen', 'ok');
-      } else {
-        showToast('Ungültige Datei', 'err');
-      }
-    } catch (err) {
-      showToast('Fehler beim Lesen der Datei', 'err');
+function findObj(type,id){
+  if(type==='sammler')return sammler;
+  const map={bohrer:bohrerList,kraftwerk:kraftwerkList,holzofen:holzofenList,fabrik:fabrikList,uranBohrer:uranBohrerList,atomkw:atomkwList};
+  const idN=typeof id==='string'?parseInt(id):id;
+  return map[type]?.find(x=>x.id===idN);
+}
+function setPath(o,path,val){const p=path.split('.');let c=o;for(let i=0;i<p.length-1;i++)c=c[p[i]];c[p[p.length-1]]=val;}
+
+document.addEventListener('change',e=>{
+  const inp=e.target;if(!inp.dataset.bind)return;
+  const{type,id,field}=inp.dataset;const obj=findObj(type,id);if(!obj)return;
+  const val=parseFloat(inp.value)||0;setPath(obj,field,val);
+  if(field.startsWith('booster')){
+    const toggle=inp.closest('.bst-body')?.previousElementSibling;
+    if(toggle){const o=findObj(type,id),badge=toggle.querySelector('.bst-badge');
+      if(o?.booster.mult>1&&o?.booster.hours>0){if(badge)badge.textContent=`× ${o.booster.mult}  ${o.booster.hours}h`;else{const b=document.createElement('span');b.className='bst-badge';b.textContent=`× ${o.booster.mult}  ${o.booster.hours}h`;toggle.insertBefore(b,toggle.querySelector('.bst-chevron'));}toggle.classList.add('active');}
+      else{if(badge)badge.remove();toggle.classList.remove('active');}
     }
-    input.value = ''; // reset so same file can be re-imported
+  }
+  updateDisplay();autoSave();
+});
+
+// ══════════════════════════════════════════════════════════
+//  SAVE / LOAD
+// ══════════════════════════════════════════════════════════
+let _saveTimer=null;
+function getSnapshot(){
+  return{version:4,_id,
+    sammler:JSON.parse(JSON.stringify(sammler)),
+    bohrerList:JSON.parse(JSON.stringify(bohrerList)),
+    kraftwerkList:JSON.parse(JSON.stringify(kraftwerkList)),
+    holzofenList:JSON.parse(JSON.stringify(holzofenList)),
+    fabrikList:JSON.parse(JSON.stringify(fabrikList)),
+    uranBohrerList:JSON.parse(JSON.stringify(uranBohrerList)),
+    atomkwList:JSON.parse(JSON.stringify(atomkwList)),
+    timeInput:document.getElementById('timeInput')?.value??'15min, 1h, 4h, 12h, 24h'
   };
+}
+function applySnapshot(s){
+  if(!s||s.version!==4)return false;
+  _id=s._id??_id;
+  Object.assign(sammler,s.sammler);
+  bohrerList=s.bohrerList??[];kraftwerkList=s.kraftwerkList??[];
+  holzofenList=s.holzofenList??[];fabrikList=s.fabrikList??[];
+  uranBohrerList=s.uranBohrerList??[];atomkwList=s.atomkwList??[];
+  const ti=document.getElementById('timeInput');if(ti&&s.timeInput)ti.value=s.timeInput;
+  return true;
+}
+function autoSave(){
+  const dot=document.getElementById('autosaveDot');if(dot)dot.className='autosave-dot saving';
+  clearTimeout(_saveTimer);_saveTimer=setTimeout(()=>{try{localStorage.setItem(STATE_KEY,JSON.stringify(getSnapshot()));if(dot)dot.className='autosave-dot saved';setTimeout(()=>{if(dot)dot.className='autosave-dot';},1800);}catch{if(dot)dot.className='autosave-dot';}},400);
+}
+function tryLoadSaved(){try{const r=localStorage.getItem(STATE_KEY);if(!r)return false;return applySnapshot(JSON.parse(r));}catch{return false;}}
+
+function exportJSON(){
+  try{const snap=getSnapshot();snap.exportedAt=new Date().toISOString();const blob=new Blob([JSON.stringify(snap,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`kaktus-config_${new Date().toISOString().slice(0,16).replace('T','_').replace(':','-')}.json`;a.click();URL.revokeObjectURL(a.href);showToast('✓ Exportiert','ok');}catch{showToast('Export fehlgeschlagen','err');}
+}
+function importJSON(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{try{const s=JSON.parse(e.target.result);if(applySnapshot(s)){renderAll();showToast('✓ Konfiguration geladen','ok');}else showToast('Ungültige Datei','err');}catch{showToast('Fehler beim Lesen','err');}input.value='';};
   reader.readAsText(file);
 }
+function confirmReset(){if(!confirm('Alle Eingaben zurücksetzen?'))return;localStorage.removeItem(STATE_KEY);loadDefaults();renderAll();showToast('Zurückgesetzt','ok');}
 
-// ── Reset ──
-function confirmReset() {
-  if (!confirm('Alle Eingaben zurücksetzen und Beispielwerte laden?')) return;
-  localStorage.removeItem(STORAGE_KEY);
-  loadDefaults();
-  renderAll();
-  showToast('Zurückgesetzt', 'ok');
+// TOAST
+let _toastTimer=null;
+function showToast(msg,type=''){const el=document.getElementById('toast');if(!el)return;el.textContent=msg;el.className='toast show '+type;clearTimeout(_toastTimer);_toastTimer=setTimeout(()=>{el.className='toast';},2600);}
+
+// ══════════════════════════════════════════════════════════
+//  PASSWORD / DEV MODE
+// ══════════════════════════════════════════════════════════
+let devModeActive=false,pwInput='';
+function openPwOverlay(){if(devModeActive){openDevModal();return;}pwInput='';updatePwDots();document.getElementById('pwError').textContent='';document.getElementById('pwOverlay').classList.add('show');}
+function closePwOverlay(){document.getElementById('pwOverlay').classList.remove('show');pwInput='';updatePwDots();}
+function updatePwDots(){for(let i=0;i<4;i++)document.getElementById(`pd${i}`).className='pw-dot'+(i<pwInput.length?' filled':'');}
+function pwKey(k){if(pwInput.length>=4)return;pwInput+=k;updatePwDots();if(pwInput.length===4)setTimeout(pwEnter,80);}
+function pwDel(){pwInput=pwInput.slice(0,-1);updatePwDots();}
+function pwEnter(){
+  if(pwInput===CONFIG.devPassword){devModeActive=true;document.getElementById('devTrigger').classList.add('active-dev');document.getElementById('devTrigger').textContent='⚙ DEV';closePwOverlay();openDevModal();showToast('🔓 Dev Mode aktiviert','gold');}
+  else{document.getElementById('pwError').textContent='FALSCHER CODE';pwInput='';updatePwDots();}
 }
 
-// ── Toast helper ──
-let _toastTimer = null;
-function showToast(msg, type = '') {
-  const el = document.getElementById('toast');
-  if (!el) return;
-  el.textContent = msg;
-  el.className   = 'toast show ' + type;
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => { el.className = 'toast'; }, 2400);
-}
+// ══════════════════════════════════════════════════════════
+//  DEV MODE EDITOR
+// ══════════════════════════════════════════════════════════
+let devCurrentMachine=null;
+const devEdits={};
 
-// ── Try to restore from localStorage on startup ──
-function tryLoadSaved() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return false;
-    const snap = JSON.parse(raw);
-    return applySnapshot(snap);
-  } catch (e) {
-    return false;
+function openDevModal(){
+  if(!devModeActive)return;
+  const sidebar=document.getElementById('devSidebar');sidebar.innerHTML='';
+  const machines=Object.entries(levelData.machines);
+  machines.forEach(([key,m])=>{
+    const tab=document.createElement('div');tab.className='dev-tab'+(devCurrentMachine===key?' active':'');
+    tab.textContent=m.label;tab.onclick=()=>devSelectMachine(key);sidebar.appendChild(tab);
+  });
+  if(!devCurrentMachine&&machines.length>0)devSelectMachine(machines[0][0]);
+  document.getElementById('devModal').classList.add('show');
+}
+function closeDevModal(){document.getElementById('devModal').classList.remove('show');}
+
+function devSelectMachine(key){
+  devCurrentMachine=key;
+  document.querySelectorAll('.dev-tab').forEach(t=>t.classList.toggle('active',t.textContent===levelData.machines[key].label));
+  const m=levelData.machines[key];
+  document.getElementById('devTabDesc').textContent=`${m.label} · Stufen 1–${CONFIG.maxLevel} · Intervall ist pro Stufe einstellbar`;
+  const prodFields=Object.entries(m.fields).filter(([k])=>k!=='interval');
+  const thead=document.getElementById('devThead'),tbody=document.getElementById('devTbody');
+  thead.innerHTML=`<tr><th class="lv-col">Stufe</th>${prodFields.map(([k,l])=>`<th>${l}</th>`).join('')}<th class="iv-col">Intervall (s)</th></tr>`;
+  tbody.innerHTML='';
+  for(let lv=1;lv<=CONFIG.maxLevel;lv++){
+    const base=m.levels.find(l=>l.level===lv)||{};
+    const ov=devEdits[key]?.[lv]||{};
+    const isModified=Object.keys(ov).length>0;
+    const tr=document.createElement('tr');if(isModified)tr.classList.add('modified');
+    let tds=`<td class="lv-num">${lv}</td>`;
+    for(const[f] of prodFields){
+      const val=ov[f]!==undefined?ov[f]:(base[f]??0);const mod=ov[f]!==undefined?' modified':'';
+      tds+=`<td><input type="number" value="${val}" class="${mod}" data-dev-machine="${key}" data-dev-level="${lv}" data-dev-field="${f}" onchange="devFieldChange(this)"></td>`;
+    }
+    const ivVal=ov['interval']!==undefined?ov['interval']:(base['interval']??1);const ivMod=ov['interval']!==undefined?' modified':'';
+    tds+=`<td><input type="number" value="${ivVal}" step="0.1" min="0.1" class="${ivMod}" data-dev-machine="${key}" data-dev-level="${lv}" data-dev-field="interval" onchange="devFieldChange(this)"></td>`;
+    tr.innerHTML=tds;tbody.appendChild(tr);
   }
 }
 
-// ═══════════════════════════════════════════
+function devFieldChange(inp){
+  const key=inp.dataset.devMachine,lv=parseInt(inp.dataset.devLevel),field=inp.dataset.devField;
+  const val=parseFloat(inp.value)||0;
+  const base=levelData.machines[key]?.levels.find(l=>l.level===lv)?.[field]??0;
+  if(!devEdits[key])devEdits[key]={};if(!devEdits[key][lv])devEdits[key][lv]={};
+  if(val===base){delete devEdits[key][lv][field];if(Object.keys(devEdits[key][lv]).length===0)delete devEdits[key][lv];inp.classList.remove('modified');}
+  else{devEdits[key][lv][field]=val;inp.classList.add('modified');}
+  inp.closest('tr').classList.toggle('modified',Object.keys(devEdits[key]?.[lv]||{}).length>0);
+}
+
+function devApplyAndClose(){
+  const overrides={};
+  for(const[mk,lvEdits] of Object.entries(devEdits)){
+    if(!overrides[mk])overrides[mk]={};
+    for(const[lv,fields] of Object.entries(lvEdits)){
+      overrides[mk][lv]=fields;
+      const entry=levelData.machines[mk]?.levels.find(l=>l.level===parseInt(lv));
+      if(entry)Object.assign(entry,fields);
+    }
+  }
+  saveLocalOverrides(overrides);closeDevModal();renderAll();showToast('✓ Stufen-Werte übernommen','gold');
+}
+
+function devClearOverrides(){
+  if(!confirm('Alle lokalen Wert-Überschreibungen löschen?'))return;
+  localStorage.removeItem(OVERRIDE_KEY);
+  levelData=JSON.parse(JSON.stringify(DEFAULT_LEVEL_DATA));
+  Object.keys(devEdits).forEach(k=>delete devEdits[k]);
+  closeDevModal();devCurrentMachine=null;
+  fetchLevelData().then(()=>renderAll());showToast('Überschreibungen gelöscht','ok');
+}
+
+function devDownloadJSON(){
+  const output=JSON.parse(JSON.stringify(levelData));
+  output.updated=new Date().toISOString().slice(0,10);
+  output.note='Exportiert via Kaktus-Tycoon Rechner Dev Mode';
+  for(const[mk,lvEdits] of Object.entries(devEdits))
+    for(const[lv,fields] of Object.entries(lvEdits)){const entry=output.machines[mk]?.levels.find(l=>l.level===parseInt(lv));if(entry)Object.assign(entry,fields);}
+  const blob=new Blob([JSON.stringify(output,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='kaktus-levels.json';a.click();URL.revokeObjectURL(a.href);
+  showToast('✓ kaktus-levels.json heruntergeladen','gold');
+}
+
+// ══════════════════════════════════════════════════════════
 //  INIT
-// ═══════════════════════════════════════════
-function loadDefaults() {
-  sammler.rate = 0;
-  sammler.booster = { mult: 1, hours: 0 };
-  bohrerList     = [{ id: uid(), coalProd: 190, interval: 10.8, booster: { mult: 1, hours: 0 } }];
-  kraftwerkList  = [{ id: uid(), eProd: 650,   coalCons: 730,  interval: 7.2,  booster: { mult: 1, hours: 0 } }];
-  holzofenList   = [{ id: uid(), eProd: 260,   woodCons: 146,  interval: 14.4, initialWood: 5000, booster: { mult: 1, hours: 0 } }];
-  fabrikList     = [{ id: uid(), cProd: 5292,  eCons: 140,     interval: 3.6,  booster: { mult: 1, hours: 0 } }];
+// ══════════════════════════════════════════════════════════
+function loadDefaults(){
+  sammler.rate=0;sammler.booster={mult:1,hours:0};
+  bohrerList=[{id:uid(),level:10,booster:{mult:1,hours:0}}];
+  kraftwerkList=[{id:uid(),level:13,booster:{mult:1,hours:0}}];
+  holzofenList=[{id:uid(),level:13,initialWood:5000,booster:{mult:1,hours:0}}];
+  fabrikList=[{id:uid(),level:13,booster:{mult:1,hours:0}}];
+  uranBohrerList=[];
+  atomkwList=[];
 }
 
-const restoredFromSave = tryLoadSaved();
-if (!restoredFromSave) loadDefaults();
+(async()=>{
+  await fetchLevelData();
+  const restored=tryLoadSaved();
+  if(!restored)loadDefaults();
+  renderAll();
+  if(restored)setTimeout(()=>showToast('✓ Letzter Stand wiederhergestellt','ok'),300);
+})();
 
-renderAll();
-
-if (restoredFromSave) {
-  setTimeout(() => showToast('✓ Letzter Stand wiederhergestellt', 'ok'), 300);
-}
+document.getElementById('timeInput')?.addEventListener('input',refreshResults);
 </script>
 </body>
 </html>
