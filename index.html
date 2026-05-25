@@ -1,4 +1,4 @@
-html = r"""<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
 <meta charset="UTF-8">
@@ -1626,9 +1626,3 @@ document.getElementById('timeInput')?.addEventListener('input',refreshResults);
 </script>
 </body>
 </html>"""
-
-with open('/home/claude/kaktus-tycoon/kaktus-tycoon-rechner.html', 'w', encoding='utf-8') as f:
-    f.write(html)
-print("Written:", len(html), "chars")
-PYEOF
-python3 /tmp/build_html.py
